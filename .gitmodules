@@ -1,0 +1,6 @@
+[submodule "third_party/graspnetAPI"]
+	path = third_party/graspnetAPI
+	url = https://github.com/graspnet/graspnetAPI.git
+[submodule "third_party/graspnet-baseline"]
+	path = third_party/graspnet-baseline
+	url = https://github.com/graspnet/graspnet-baseline.git
