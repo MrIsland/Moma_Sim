@@ -1,0 +1,85 @@
+# Task name
+task_name: MujocoRobotEnv
+
+# Base Setting
+seed: 42
+sim_device: 'cuda:0'
+pipeline: 'gpu'
+
+# Robot Setting
+asset:
+  assetRoot: "./assets"
+  assetFileNameMoma: "island_moma_robot/xml/island_moma_robot.xml"
+  assetFileNameArm: "island_moma_robot/xml/rm.xml"
+  assetFileNameArmURDF: "island_moma_robot/urdf/rm_65_6f_description.urdf"
+
+#  momaDefaultDofPos: [0, 0.0, 0, 0.0, 0, 0, 0.5, -0.5, 0.5, 0.5, 0.5, -0.5]
+  momaDefaultDofPos: [-0.67, 0.0, 0.8, 0.0, 1.36, 3.14, 1.0, -1.0, 1.0, 1.0, 1.0, -1.0]
+#  momaDefaultDofPos: [2.85731, 0.41476, -0.27791, 0.25300, -1.77418, 0.00550, 0.5, -0.5, 0.5, 0.5, 0.5, -0.5]
+#  momaDefaultStatePos: [-0.5, -0.5, 0.0, 1, 0.0, 0.0, 0.0]
+  momaDefaultStatePos: [-0.8, -0.8, 0.0, 0.707, 0.0, 0.0, 0.707]
+  arm_action_scale: 50
+
+
+PID:
+#  kp_arm: [300, 400, 400, 100, 100, 20]
+#  ki_arm: [0.01, 0.01, 0.01, 0.01, 0.01, 0.01]
+#  kd_arm: [50, 50, 50, 50, 50, 0.1]
+  kp_arm: [300.0, 400.0, 400.0, 50.0, 200.0, 1.0]
+  ki_arm: [ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  kd_arm: [0.0, 0.0, 0.0, 0.0, 0.0, 0]
+  llim_arm: [-300.0, -300.0, -300.0, -50.0, -50.0, -20.0]
+  ulim_arm: [300.0, 300.0, 300.0, 50.0, 50.0, 20.0]
+
+# Model Setting
+params:
+  checkpoint: './ckpts/moma/MomaMovePickBottleStateWGraspPosDR.pth'
+#  checkpoint: '/home/island/Desktop/mobile_manipulation/IsaacGymEnvs/isaacgymenvs/runs/MomaMovePickBottleStateWGraspPosDR_13-15-43-25/nn/MomaMovePickBottleStateWGraspPosDR.pth'
+  model:
+    name: continuous_a2c_logstd
+
+  network:
+    name: actor_critic   # {actor_critic, pointnavresnetnet}
+    separate: False
+
+    space:
+      continuous:
+        mu_activation: None
+        sigma_activation: None
+        mu_init:
+          name: default
+        sigma_init:
+          name: const_initializer
+          val: 0
+        fixed_sigma: True
+    mlp:
+      units: [256, 128, 64]
+      activation: elu
+      d2rl: False
+
+      initializer:
+        name: default
+      regularizer:
+        name: None
+
+    visual_encoder:
+      net: resnet-18
+      in_channels: 1
+      img_h: 256
+      img_w: 256
+      flag_crop: False
+
+graspfusioner:
+  interval_size: 0.15
+  max_octree_threshold: 0.45
+  min_octree_threshold: 0.3
+  min_ori_threshold: 1.57
+  min_component_size: 20
+  max_grasp_pos: 200
+
+  graspnet:
+    ckpt_path: './ckpts/graspnet/checkpoint-rs.tar'
+    num_point: 20000
+    num_view: 300
+    collision_threshold: 0.01
+    voxel_size: 0.01
