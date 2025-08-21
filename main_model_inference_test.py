@@ -61,7 +61,7 @@ if __name__ == '__main__':
         curr_data = ee_pos_list[i]
         curr_data = [float(x) for x in curr_data.strip().split()]
         action_base = curr_data[:2] * cmd_base_limit
-        action_arm = curr_data[2:-1] * cmd_arm_limit / 50
+        action_arm = curr_data[2:-1] * cmd_arm_limit / 25
         # action_base = np.array([0.0, 0.0])
         # action_arm = np.array([0, 0, 0.00, 0.0, 0.0, 0.0])
         action_gripper = np.array([1])

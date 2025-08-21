@@ -12,7 +12,7 @@ if __name__ == '__main__':
     mujoco_robot_env = MujocoRobotEnv(config)
     # mujoco_robot_env.run_simulation()
     cmd_arm_limit = np.array([0.05, 0.05, 0.05, 0.1, 0.1, 0.1])
-    cmd_base_limit = np.array([0.2, 0.4])
+    cmd_base_limit = np.array([0.3, 0.6])
     cnt = 0
     obs = None
     action_scale = config['asset']['arm_action_scale']
@@ -26,7 +26,6 @@ if __name__ == '__main__':
             grasp_poses_factory = mujoco_robot_env.grasp_poses_factory
             eef_pos = mujoco_robot_env.states['eef_pos']
             eef_quat = mujoco_robot_env.states['eef_quat']
-
 
             # 2. Model Inference
             action = mujoco_robot_env.control_policy.get_action(obs)

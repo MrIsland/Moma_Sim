@@ -12,13 +12,14 @@ if __name__ == '__main__':
     mujoco_robot_env = MujocoRobotEnv(config)
     cmd_arm_limit = np.array([0.05, 0.05, 0.05, 0.1, 0.1, 0.1])
     cmd_base_limit = np.array([0.3, 0.6])
-    num_obs = 555
+    num_obs = 459
     action_scale = config['asset']['arm_action_scale']
     obs_input_path = '/home/island/Desktop/mobile_manipulation/IsaacGymEnvs/isaacgymenvs/test_vis/pt'
     for i in range(num_obs):
         pt_file = os.path.join(obs_input_path, '{}.pt'.format(i + 1))
         loaded_obs = torch.load(pt_file)
         action = mujoco_robot_env.control_policy.get_action(loaded_obs)
+        print('loaded_obs:    {}'.format(loaded_obs[:, :9]))
         action = action.squeeze(0).cpu().detach().numpy()
         action_base, action_arm, action_gripper = action[:2], action[2:-1], np.array([action[-1]])
         action_base = action_base * cmd_base_limit

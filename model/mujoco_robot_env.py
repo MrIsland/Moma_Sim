@@ -162,6 +162,7 @@ class MujocoRobotEnv:
         # if self.cnt % 20 == 0:
         #     o3d.visualization.draw_geometries([pcd])
         # print('_get_observation')
+        print('loaded_obs:     {}'.format(obs_buf[:, :9]))
         return obs_buf
 
     def cam2world(self, pcd):
@@ -311,6 +312,7 @@ class MujocoRobotEnv:
         rgb, depth, seg = self._get_image()
         site_xmat = self.robot_data.site_xmat[site_id]
         site_quat = R.from_matrix(site_xmat.reshape(3, 3)).as_quat()
+        site_quat = np.roll(site_quat, 1)
         pcd = self.depth_to_pointcloud(rgb, depth, 'twist')
 
         pcd = self.cam2world(pcd)
@@ -348,7 +350,8 @@ class MujocoRobotEnv:
             'grasp_pos_vector': self.grasp_pos_tensor.reshape(1, -1)
         })
         # print('eef_pos:     {}'.format(self.robot_data.xpos[17]))
-        print('gripper_site:     {}'.format(self.states['eef_pos']))
+        # print('gripper_site pos:     {}'.format(self.states['eef_pos']))
+        # print('gripper_site quat:     {}'.format(self.states['eef_quat']))
         pos, orn = self.ik_arm_controller.get_ee_pose()
         arm_ee_pos = np.concatenate([pos, orn])
         # print('arm_ee_pos:    {}'.format(arm_ee_pos))
@@ -363,8 +366,6 @@ class MujocoRobotEnv:
         # print('self.robot_data.q_gripper:      {}'.format(self.robot_data.qpos[-6:]))
         # print('self.gripper_site_ee_pos:     {}'.format(np.concatenate([self.robot_data.site_xpos[site_id], -site_quat])))
         # print('self.gripper_site_ee_pos:     {}'.format(np.concatenate([self.robot_data.site_xpos[site_id], R.from_matrix(site_xmat.reshape(3, 3)).as_euler('xyz')])))
-
-
 
 
     def generate_random_transform_batch(self, pos, num_samples=64):
