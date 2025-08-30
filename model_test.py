@@ -12,7 +12,7 @@ if __name__ == '__main__':
     mujoco_robot_env = MujocoRobotEnv(config)
     cmd_arm_limit = np.array([0.05, 0.05, 0.05, 0.1, 0.1, 0.1])
     cmd_base_limit = np.array([0.3, 0.6])
-    num_obs = 459
+    num_obs = 583
     action_scale = config['asset']['arm_action_scale']
     obs_input_path = '/home/island/Desktop/mobile_manipulation/IsaacGymEnvs/isaacgymenvs/test_vis/pt'
     for i in range(num_obs):

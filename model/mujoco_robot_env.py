@@ -349,6 +349,7 @@ class MujocoRobotEnv:
             'curr_depth_img_tensor_batch': curr_depth_tensor.reshape(1, -1),
             'grasp_pos_vector': self.grasp_pos_tensor.reshape(1, -1)
         })
+        print('self.states[robot_vel]:      {}'.format(self.states['robot_vel']))
         # print('eef_pos:     {}'.format(self.robot_data.xpos[17]))
         # print('gripper_site pos:     {}'.format(self.states['eef_pos']))
         # print('gripper_site quat:     {}'.format(self.states['eef_quat']))

@@ -111,7 +111,7 @@ class IKARMController:
             curr_pos = curr_ee_pos[:3]
             curr_quat = R.from_euler('xyz', curr_ee_pos[3:]).as_quat()
         R_curr = R.from_quat(curr_quat)
-        R_delta = R.from_euler('zxy', delta_pos[3:])
+        R_delta = R.from_euler('xyz', delta_pos[3:])
         target_quat = (R_delta * R_curr).as_quat()
         target_pos = curr_pos + delta_pos[:3]
         return target_pos, target_quat
@@ -144,7 +144,7 @@ class IKARMController:
             jointRanges=self.joint_ranges,
             restPoses=self.get_joint_state().tolist(),
             # restPoses=rest_pos,
-            maxNumIterations=2000,
+            maxNumIterations=3000,
             residualThreshold=1e-7,
             solver = p.IK_DLS
             # currentPositions=self.get_joint_state()
