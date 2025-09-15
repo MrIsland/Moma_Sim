@@ -1,0 +1,7 @@
+assets/catch_it/
+pretrained_models/
+build/
+devel/
+src/moma_perception/output/
+src/moma_perception/scripts/utils/graspnet-baseline
+src/moma_perception/scripts/utils/openseed_new

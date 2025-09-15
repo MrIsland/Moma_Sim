@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="moma_perception" type="moma_perception_main.py" name="moma_perception_node" output="screen" />
+
+    <node pkg="moma_bringup" type="moma_controller.py" name="moma_controller_node" output="screen" />
+</launch>

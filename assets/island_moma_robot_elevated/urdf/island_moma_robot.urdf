@@ -1,0 +1,1275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="island_moma_robot">
+  <!-- begin with mobile base urdf -->
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="0.01685 0.00094185 0.10995"
+        rpy="0 0 0" />
+      <mass
+        value="22.81" />
+      <inertia
+        ixx="0.48422"
+        ixy="-2.2573E-05"
+        ixz="-0.00012718"
+        iyy="0.48143"
+        iyz="2.839E-06"
+        izz="0.94153" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.8 0.8 0.8 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="link_lw">
+    <inertial>
+      <origin
+        xyz="2.3585E-08 -0.048308 -7.3317E-05"
+        rpy="0 0 0" />
+      <mass
+        value="0.82641" />
+      <inertia
+        ixx="0.0010589"
+        ixy="-3.6959E-10"
+        ixz="1.2701E-08"
+        iyy="0.0014428"
+        iyz="3.042E-08"
+        izz="0.0010565" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/link_lw.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.8 0.8 0.8 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/link_lw.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_lw"
+    type="continuous">
+    <origin
+      xyz="0 0.2365 0.0645999999999994"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="link_lw" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="link_rw">
+    <inertial>
+      <origin
+        xyz="-7.3313E-05 0.048308 7.5595E-07"
+        rpy="0 0 0" />
+      <mass
+        value="0.82641" />
+      <inertia
+        ixx="0.0010565"
+        ixy="-3.0415E-08"
+        ixz="3.7059E-08"
+        iyy="0.0014428"
+        iyz="6.7343E-10"
+        izz="0.0010589" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/link_rw.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.8 0.8 0.8 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/link_rw.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_rw"
+    type="continuous">
+    <origin
+      xyz="0 -0.2365 0.0645999999999994"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="link_rw" />
+    <axis
+      xyz="0 -1 0" />
+  </joint>
+  <link
+    name="link_fucl">
+    <inertial>
+      <origin
+        xyz="0.010603 -0.00047384 -0.035048"
+        rpy="0 0 0" />
+      <mass
+        value="0.060047" />
+      <inertia
+        ixx="4.9536E-05"
+        ixy="7.0829E-07"
+        ixz="1.757E-05"
+        iyy="5.4338E-05"
+        iyz="-1.1867E-06"
+        izz="4.0076E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/link_fucl.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.8 0.8 0.8 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/link_fucl.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_fucl"
+    type="continuous">
+    <origin
+      xyz="0.2095 0.163 0.11396325"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="link_fucl" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="link_fclw">
+    <inertial>
+      <origin
+        xyz="5.5511E-17 -0.016 1.4572E-16"
+        rpy="0 0 0" />
+      <mass
+        value="0.13673" />
+      <inertia
+        ixx="5.6735E-05"
+        ixy="-7.0529E-20"
+        ixz="-4.2358E-12"
+        iyy="8.8555E-05"
+        iyz="5.664E-22"
+        izz="5.6744E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/link_fclw.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.8 0.8 0.8 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/link_fclw.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_fclw"
+    type="continuous">
+    <origin
+      xyz="0.0355 0.016 -0.07676325"
+      rpy="0 0 0" />
+    <parent
+      link="link_fucl" />
+    <child
+      link="link_fclw" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="link_fucr">
+    <inertial>
+      <origin
+        xyz="0.010603 -0.00047384 -0.035048"
+        rpy="0 0 0" />
+      <mass
+        value="0.060047" />
+      <inertia
+        ixx="4.9536E-05"
+        ixy="7.0829E-07"
+        ixz="1.757E-05"
+        iyy="5.4338E-05"
+        iyz="-1.1867E-06"
+        izz="4.0076E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/link_fucr.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.8 0.8 0.8 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/link_fucr.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_fucr"
+    type="continuous">
+    <origin
+      xyz="0.209500000000001 -0.163 0.11396325"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="link_fucr" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="link_fcrw">
+    <inertial>
+      <origin
+        xyz="5.5511E-17 -0.016 1.1796E-16"
+        rpy="0 0 0" />
+      <mass
+        value="0.13673" />
+      <inertia
+        ixx="5.6735E-05"
+        ixy="-6.4903E-20"
+        ixz="-4.2358E-12"
+        iyy="8.8555E-05"
+        iyz="-7.0687E-21"
+        izz="5.6744E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/link_fcrw.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.8 0.8 0.8 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/link_fcrw.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_fcrw"
+    type="continuous">
+    <origin
+      xyz="0.0355 0.016 -0.07676325"
+      rpy="0 0 0" />
+    <parent
+      link="link_fucr" />
+    <child
+      link="link_fcrw" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="link_bucl">
+    <inertial>
+      <origin
+        xyz="-0.010603 0.00047384 -0.035048"
+        rpy="0 0 0" />
+      <mass
+        value="0.060047" />
+      <inertia
+        ixx="4.9536E-05"
+        ixy="7.0829E-07"
+        ixz="-1.757E-05"
+        iyy="5.4338E-05"
+        iyz="1.1867E-06"
+        izz="4.0076E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/link_bucl.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.8 0.8 0.8 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/link_bucl.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_bucl"
+    type="continuous">
+    <origin
+      xyz="-0.215 0.17 0.113963249999999"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="link_bucl" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="link_bclw">
+    <inertial>
+      <origin
+        xyz="0 -0.016 1.1102E-16"
+        rpy="0 0 0" />
+      <mass
+        value="0.13673" />
+      <inertia
+        ixx="5.6735E-05"
+        ixy="-1.4772E-20"
+        ixz="4.2358E-12"
+        iyy="8.8555E-05"
+        iyz="4.577E-21"
+        izz="5.6744E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/link_bclw.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.8 0.8 0.8 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/link_bclw.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_bclw"
+    type="continuous">
+    <origin
+      xyz="-0.0355 0.016 -0.07676325"
+      rpy="0 0 0" />
+    <parent
+      link="link_bucl" />
+    <child
+      link="link_bclw" />
+    <axis
+      xyz="0 -1 0" />
+  </joint>
+  <link
+    name="link_bucr">
+    <inertial>
+      <origin
+        xyz="-0.010603 0.00047384 -0.035048"
+        rpy="0 0 0" />
+      <mass
+        value="0.060047" />
+      <inertia
+        ixx="4.9536E-05"
+        ixy="7.0829E-07"
+        ixz="-1.757E-05"
+        iyy="5.4338E-05"
+        iyz="1.1867E-06"
+        izz="4.0076E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/link_bucr.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.8 0.8 0.8 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/link_bucr.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_bucr"
+    type="continuous">
+    <origin
+      xyz="-0.215 -0.17 0.113963249999999"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="link_bucr" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="link_bcrw">
+    <inertial>
+      <origin
+        xyz="0 -0.016 1.0408E-16"
+        rpy="0 0 0" />
+      <mass
+        value="0.13673" />
+      <inertia
+        ixx="5.6735E-05"
+        ixy="-6.639E-21"
+        ixz="4.2358E-12"
+        iyy="8.8555E-05"
+        iyz="-2.9093E-21"
+        izz="5.6744E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/link_bcrw.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.8 0.8 0.8 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/link_bcrw.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_bcrw"
+    type="continuous">
+    <origin
+      xyz="-0.0355 0.016 -0.07676325"
+      rpy="0 0 0" />
+    <parent
+      link="link_bucr" />
+    <child
+      link="link_bcrw" />
+    <axis
+      xyz="0 -1 0" />
+  </joint>
+<!-- begin with arm urdf -->
+  <link
+    name="arm_base_link">
+    <inertial>
+      <origin
+        xyz="-0.00043295 -3.5277E-05 0.059942"
+        rpy="0 0 0" />
+      <mass
+        value="0.84105" />
+      <inertia
+        ixx="0.0017261"
+        ixy="2.5273E-06"
+        ixz="-3.6769E-05"
+        iyy="0.0017099"
+        iyz="1.6802E-06"
+        izz="0.00090402" />
+    </inertial>
+    <visual>pa
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/arm_base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/arm_base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint_arm_base"
+    type="fixed">
+    <origin
+      xyz="0.11811 0 0.16217"
+      rpy="0 0 3.14" />
+    <parent
+      link="base_link" />
+    <child
+      link="arm_base_link" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="arm_link1">
+    <inertial>
+      <origin
+        xyz="2.1376E-07 0.021108 -0.025186"
+        rpy="0 0 0" />
+      <mass
+        value="0.59356" />
+      <inertia
+        ixx="0.0012661"
+        ixy="-1.2951E-08"
+        ixz="-9.8019E-09"
+        iyy="0.0011817"
+        iyz="-0.00021122"
+        izz="0.00056135" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/arm_link1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/arm_link1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint1"
+    type="revolute">
+    <origin
+      xyz="0 0 0.2405"
+      rpy="0 0 0" />
+    <parent
+      link="arm_base_link" />
+    <child
+      link="arm_link1" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-3.107"
+      upper="3.107"
+      effort="100"
+      velocity="1" />
+  </joint>
+  <link
+    name="arm_link2">
+    <inertial>
+      <origin
+        xyz="0.15226 6.0139E-07 -0.0062025"
+        rpy="0 0 0" />
+      <mass
+        value="0.86418" />
+      <inertia
+        ixx="0.00063254"
+        ixy="-5.979E-09"
+        ixz="0.00042163"
+        iyy="0.0020527"
+        iyz="1.8401E-09"
+        izz="0.0019528" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/arm_link2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/arm_link2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint2"
+    type="revolute">
+    <origin
+      xyz="0 0 0"
+      rpy="1.5708 -1.5708 0" />
+    <parent
+      link="arm_link1" />
+    <child
+      link="arm_link2" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-2.269"
+      upper="2.269"
+      effort="100"
+      velocity="1" />
+  </joint>
+  <link
+    name="arm_link3">
+    <inertial>
+      <origin
+        xyz="5.0421E-06 -0.059593 0.010569"
+        rpy="0 0 0" />
+      <mass
+        value="0.28963" />
+      <inertia
+        ixx="0.00063737"
+        ixy="-7.0522E-08"
+        ixz="-3.8666E-08"
+        iyy="0.00015648"
+        iyz="-0.00014461"
+        izz="0.00061418" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/arm_link3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/arm_link3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint3"
+    type="revolute">
+    <origin
+      xyz="0.256 0 0"
+      rpy="0 0 1.5708" />
+    <parent
+      link="arm_link2" />
+    <child
+      link="arm_link3" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-2.356"
+      upper="2.356"
+      effort="100"
+      velocity="1" />
+  </joint>
+  <link
+    name="arm_link4">
+    <inertial>
+      <origin
+        xyz="1.1466E-06 -0.018041 -0.021541"
+        rpy="0 0 0" />
+      <mass
+        value="0.23941" />
+      <inertia
+        ixx="0.00028594"
+        ixy="2.6611E-09"
+        ixz="-1.8435E-09"
+        iyy="0.00026273"
+        iyz="4.4238E-05"
+        izz="0.00011989" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/arm_link4.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/arm_link4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint4"
+    type="revolute">
+    <origin
+      xyz="0 -0.21 0"
+      rpy="1.5708 0 0" />
+    <parent
+      link="arm_link3" />
+    <child
+      link="arm_link4" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-3.107"
+      upper="3.107"
+      effort="100"
+      velocity="1" />
+  </joint>
+  <link
+    name="arm_link5">
+    <inertial>
+      <origin
+        xyz="3.4542E-06 -0.059382 0.0073678"
+        rpy="0 0 0" />
+      <mass
+        value="0.21879" />
+      <inertia
+        ixx="0.00035053"
+        ixy="-3.1667E-08"
+        ixz="-1.7442E-08"
+        iyy="0.00010492"
+        iyz="-7.824E-05"
+        izz="0.00033447" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/arm_link5.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/arm_link5.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint5"
+    type="revolute">
+    <origin
+      xyz="0 0 0"
+      rpy="-1.5708 0 0" />
+    <parent
+      link="arm_link4" />
+    <child
+      link="arm_link5" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-2.234"
+      upper="2.234"
+      effort="100"
+      velocity="1" />
+  </joint>
+  <link
+    name="arm_link6">
+    <inertial>
+      <origin
+        xyz="0.00032231 -0.00017819 -0.028676"
+        rpy="0 0 0" />
+      <mass
+        value="0.14433" />
+      <inertia
+        ixx="3.6119E-05"
+        ixy="-1.3242E-06"
+        ixz="-3.2733E-08"
+        iyy="3.4626E-05"
+        iyz="7.6661E-09"
+        izz="6.1463E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/arm_link6.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://IslandMomaRobot/meshes/arm_link6.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint6"
+    type="revolute">
+    <origin
+      xyz="0 -0.1725 0"
+      rpy="1.5708 0 0" />
+    <parent
+      link="arm_link5" />
+    <child
+      link="arm_link6" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-6.283"
+      upper="6.283"
+      effort="100"
+      velocity="1" />
+  </joint>
+  <!-- begin with gripper urdf -->
+  <link name="link_7">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-3.5971E-08 6.1102E-06 0.055353"/>
+      <mass value="0.47237"/>
+      <inertia ixx="0.00054317" ixy="-9.222E-09" ixz="2.4709E-09" iyy="0.00068105" iyz="-1.5078E-07" izz="0.00038996"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://IslandMomaRobot/meshes/gripper_base_link.STL"/>
+      </geometry>
+      <material name="">
+        <color rgba="0.478 0.451 0.455 1"/>
+        <!-- <color rgba="0.10196 0.10196 0.10196 1"/> -->
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://IslandMomaRobot/meshes/gripper_base_link.STL"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="leftout_Link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.0068505 0.028833 -8.8224E-08"/>
+      <mass value="0.010089"/>
+      <inertia ixx="3.7101E-06" ixy="6.4157E-07" ixz="9.3979E-12" iyy="1.1175E-06" iyz="-4.9338E-11" izz="3.12E-06"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://IslandMomaRobot/meshes/leftout_Link.STL"/>
+      </geometry>
+      <material name="">
+        <color rgba="0.66667 0.69804 0.76863 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://IslandMomaRobot/meshes/leftout_Link.STL"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="leftinn_Link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.030058 0.022769 5.1949E-07"/>
+      <mass value="0.018332"/>
+      <inertia ixx="6.7469E-06" ixy="3.6682E-06" ixz="9.1466E-11" iyy="3.9665E-06" iyz="-4.1418E-10" izz="9.6683E-06"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://IslandMomaRobot/meshes/leftinn_Link.STL"/>
+      </geometry>
+      <material name="">
+        <color rgba="0.79216 0.81961 0.93333 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://IslandMomaRobot/meshes/leftinn_Link.STL"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="left_pad">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.013913 -0.019134 4.0039E-06"/>
+      <mass value="0.018332"/>
+      <inertia ixx="6.7469E-06" ixy="3.6682E-06" ixz="8.8651E-11" iyy="3.9665E-06" iyz="-4.0981E-10" izz="9.6683E-06"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://IslandMomaRobot/meshes/left_pad.STL"/>
+      </geometry>
+      <material name="">
+        <color rgba="0.79216 0.81961 0.93333 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://IslandMomaRobot/meshes/left_pad.STL"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="left_kckle">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.0057173 0.023663 -3.1623E-06"/>
+      <mass value="0.012137"/>
+      <inertia ixx="1.086E-05" ixy="1.05E-06" ixz="6.9749E-10" iyy="6.7673E-06" iyz="-7.7731E-10" izz="5.0823E-06"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://IslandMomaRobot/meshes/left_kckle.STL"/>
+      </geometry>
+      <material name="">
+        <color rgba="0.2 0.2 0.2 1"/>
+      </material>
+    </visual>
+    <!-- <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://IslandMomaRobot/meshes/left_kckle.STL"/>
+      </geometry>
+    </collision> -->
+  </link>
+  <link name="rightout_Link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.0068505 0.028833 -8.8224E-08"/>
+      <mass value="0.010089"/>
+      <inertia ixx="3.7101E-06" ixy="6.4157E-07" ixz="9.3979E-12" iyy="1.1175E-06" iyz="-4.9338E-11" izz="3.12E-06"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://IslandMomaRobot/meshes/rightout_Link.STL"/>
+      </geometry>
+      <material name="">
+        <color rgba="0.66667 0.69804 0.76863 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://IslandMomaRobot/meshes/rightout_Link.STL"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="rightinn_Link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.030058 0.022769 5.1949E-07"/>
+      <mass value="0.018332"/>
+      <inertia ixx="6.7469E-06" ixy="3.6682E-06" ixz="9.1466E-11" iyy="3.9665E-06" iyz="-4.1418E-10" izz="9.6683E-06"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://IslandMomaRobot/meshes/rightinn_Link.STL"/>
+      </geometry>
+      <material name="">
+        <color rgba="0.79216 0.81961 0.93333 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://IslandMomaRobot/meshes/rightinn_Link.STL"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="right_pad">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.013913 -0.019134 4.0039E-06"/>
+      <mass value="0.018332"/>
+      <inertia ixx="6.7469E-06" ixy="3.6682E-06" ixz="8.8651E-11" iyy="3.9665E-06" iyz="-4.0981E-10" izz="9.6683E-06"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://IslandMomaRobot/meshes/right_pad.STL"/>
+      </geometry>
+      <material name="">
+        <color rgba="0.79216 0.81961 0.93333 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://IslandMomaRobot/meshes/right_pad.STL"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="right_kckle">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.0057173 0.023663 -3.1623E-06"/>
+      <mass value="0.012137"/>
+      <inertia ixx="1.086E-05" ixy="1.05E-06" ixz="6.9749E-10" iyy="6.7673E-06" iyz="-7.7731E-10" izz="5.0823E-06"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://IslandMomaRobot/meshes/right_kckle.STL"/>
+      </geometry>
+      <material name="">
+        <color rgba="0.2 0.2 0.2 1"/>
+      </material>
+    </visual>
+    <!-- <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://IslandMomaRobot/meshes/right_kckle.STL"/>
+      </geometry>
+    </collision> -->
+  </link>
+  <joint name="finger_joint" type="revolute">
+    <origin rpy="1.5708 0 -3.1416" xyz="-0.057 0 0.07825"/>
+    <parent link="link_7"/>
+    <child link="leftout_Link"/>
+    <axis xyz="0 0 -1"/>
+    <limit effort="1000" lower="0" upper="1" velocity="2.0"/>
+  </joint>
+  <joint name="left_kckle_joint" type="revolute">
+    <origin rpy="1.5707963267948966 0 -3.141592653589793" xyz="-0.024 0 0.09025"/>
+    <parent link="link_7"/>
+    <child link="left_kckle"/>
+    <axis xyz="0 0 -1"/>
+    <limit effort="1000" lower="-1" upper="1" velocity="2.0"/>
+    <mimic joint="finger_joint" multiplier="1" offset="0"/>
+  </joint>
+  <joint name="leftinn_joint" type="revolute">
+    <origin rpy="0 0 0" xyz="-0.010946 0.0539 0"/>
+    <parent link="leftout_Link"/>
+    <child link="leftinn_Link"/>
+    <axis xyz="0 0 -1"/>
+    <limit effort="1000" lower="-1" upper="0" velocity="2.0"/>
+    <mimic joint="finger_joint" multiplier="-1" offset="0"/>
+  </joint>
+  <joint name="left_pad_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="-0.04597 0.041903 0"/>
+    <parent link="leftinn_Link"/>
+    <child link="left_pad"/>
+    <axis xyz="0 0 0"/>
+  </joint>
+  <!--mimic joint="${prefix}finger_joint" multiplier="1" offset="0" /-->
+  <joint name="rightout_joint" type="revolute">
+    <origin rpy="1.5708 0 0" xyz="0.057 0 0.07825"/>
+    <parent link="link_7"/>
+    <child link="rightout_Link"/>
+    <axis xyz="0 0 -1"/>
+    <limit effort="1000" lower="0" upper="1" velocity="2.0"/>
+    <mimic joint="finger_joint" multiplier="1" offset="0"/>
+  </joint>
+  <joint name="right_kckle_joint" type="revolute">
+    <origin rpy="1.5707963267948966 0 -0.0" xyz="0.024 0 0.09025"/>
+    <parent link="link_7"/>
+    <child link="right_kckle"/>
+    <axis xyz="0 0 -1"/>
+    <limit effort="1000" lower="-1" upper="1" velocity="2.0"/>
+    <mimic joint="finger_joint" multiplier="1" offset="0"/>
+  </joint>
+  <joint name="rightinn_joint" type="revolute">
+    <origin rpy="0 0 0" xyz="-0.010946 0.0539 0"/>
+    <parent link="rightout_Link"/>
+    <child link="rightinn_Link"/>
+    <axis xyz="0 0 -1"/>
+    <limit effort="1000" lower="-1" upper="0" velocity="2.0"/>
+    <mimic joint="finger_joint" multiplier="-1" offset="0"/>
+  </joint>
+  <joint name="right_pad_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="-0.04597 0.041903 0"/>
+    <parent link="rightinn_Link"/>
+    <child link="right_pad"/>
+    <axis xyz="0 0 0"/>
+  </joint>
+  <joint
+    name="joint_7"
+    type="fixed">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="arm_link6" />
+    <child
+      link="link_7" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="-3.14"
+      upper="3.14"
+      effort="0"
+      velocity="0" />
+  </joint>
+  
+  <joint name="gripper_site_joint" type="fixed">
+    <parent link="arm_link6"/>
+    <child link="gripper_site"/>
+    <origin rpy="0 -1.57 -1.57" xyz="0 0 0.16"/>
+  </joint>
+  <link name="gripper_site">
+    <visual>
+      <geometry>
+        <sphere radius="0.005"/>
+      </geometry>
+      <material name="Vis"/>
+    </visual>
+  </link>
+  
+
+
+</robot>

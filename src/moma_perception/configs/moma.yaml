@@ -1,0 +1,29 @@
+# moma.yaml
+package_name: moma_perception
+
+camera_info:
+  fx: 384.088
+  fy: 383.7159
+  cx: 309.2347
+  cy: 236.91583
+  width: 1280
+  height: 720
+  depth_scale: 1000
+
+
+project_info:
+  output_path: './output'
+semantic:
+  project_name: 'openseed'
+  pretrained_path: './pretrained_models'
+  pretrained_model: 'openseed_o365.pt'
+
+  semantic_config_path: './configs/semantic'
+  class_txt: 'panoptic_categories_nomerge.txt'
+
+  swinl_lang_decouple_yaml_path: './configs/semantic/openseed/openseed_swint_lang_o365_decouple.yaml'
+  slam_config_path: './configs/slam_pipeline'
+  slam_config_yaml: 'base.yaml'
+
+device: cuda
+goal_name: bottle  # bottle 
