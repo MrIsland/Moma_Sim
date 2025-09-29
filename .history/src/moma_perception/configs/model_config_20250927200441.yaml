@@ -1,0 +1,53 @@
+# Task name
+task_name: MujocoRobotEnv
+
+# Base Setting
+seed: 42
+sim_device: 'cuda:0'
+pipeline: 'gpu'
+
+# Model Setting
+params:
+  # checkpoint: './ckpt/MomaMovePickBottleStateWGraspPosDR.pth'
+  checkpoint: './scripts/model/smooth_v2.pth'
+  model:
+    name: continuous_a2c_logstd
+
+  network:
+    name: actor_critic   # {actor_critic, pointnavresnetnet}
+    separate: False
+
+    space:
+      continuous:
+        mu_activation: None
+        sigma_activation: None
+        mu_init:
+          name: default
+        sigma_init:
+          name: const_initializer
+          val: 0
+        fixed_sigma: True
+    mlp:
+      units: [256, 128, 64]
+      activation: elu
+      d2rl: False
+
+      initializer:
+        name: default
+      regularizer:
+        name: None
+
+    visual_encoder:
+      net: resnet-18
+      in_channels: 1
+      img_h: 256
+      img_w: 256
+      flag_crop: False
+
+graspfusioner:
+  interval_size: 0.15
+  max_octree_threshold: 0.45
+  min_octree_threshold: 0.3
+  min_ori_threshold: 1.57
+  min_component_size: 20
+  max_grasp_pos: 200

@@ -1,0 +1,14 @@
+# Task name
+task_name: MomaController
+
+# Robot Setting
+asset:
+  assetRoot: "/home/island/Desktop/mobile_manipulation/realrobot/Moma_Sim_ROS/assets"
+  assetFileNameMoma: "island_moma_robot_elevated/xml/island_moma_robot_final.xml"
+  assetFileNameArm: "island_moma_robot_elevated/xml/rm.xml"
+  assetFileNameArmURDF: "island_moma_robot_elevated/urdf/rm_65_6f_description.urdf"
+  momaDefaultDofPos: [-0.67, 0.0, 0.8, 0.0, 1.36, 3.14, 1.0, -1.0, 1.0, 1.0, 1.0, -1.0]
+  momaDefaultStatePos: [-0.0, -0.0, -0.0, 0.707, 0.0, 0.0, 0.707]
+  # momaDefaultStatePos: [-0.0, -0.0, -0.0, 1.0, 0.0, 0.0, 0.0]
+  arm_action_scale: 25
+

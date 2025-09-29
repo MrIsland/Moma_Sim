@@ -1,0 +1,254 @@
+<mujoco model="island_moma_robot">
+    <compiler angle="radian" meshdir="../meshes"/>
+    <size njmax="500" nconmax="100" />
+    <option timestep="0.01667" gravity="0 0 -9.81"/>
+    <asset>
+        <mesh name="base_link" file="base_link.STL" />
+        <mesh name="link_lw" file="link_lw.STL" />
+        <mesh name="link_rw" file="link_rw.STL" />
+        <mesh name="link_fucl" file="link_fucl.STL" />
+        <mesh name="link_fclw" file="link_fclw.STL" />
+        <mesh name="link_fucr" file="link_fucr.STL" />
+        <mesh name="link_fcrw" file="link_fcrw.STL" />
+        <mesh name="link_bucl" file="link_bucl.STL" />
+        <mesh name="link_bclw" file="link_bclw.STL" />
+        <mesh name="link_bucr" file="link_bucr.STL" />
+        <mesh name="link_bcrw" file="link_bcrw.STL" />
+        <mesh name="arm_base_link" file="arm_base_link.STL" />
+        <mesh name="arm_link1" file="arm_link1.STL" />
+        <mesh name="arm_link2" file="arm_link2.STL" />
+        <mesh name="arm_link3" file="arm_link3.STL" />
+        <mesh name="arm_link4" file="arm_link4.STL" />
+        <mesh name="arm_link5" file="arm_link5.STL" />
+        <mesh name="arm_link6" file="arm_link6.STL" />
+        <mesh name="gripper_base_link" file="gripper_base_link.STL" />
+        <mesh name="leftout_Link" file="leftout_Link.STL" />
+        <mesh name="leftinn_Link" file="leftinn_Link.STL" />
+        <mesh name="left_pad" file="left_pad.STL" />
+        <mesh name="rightout_Link" file="rightout_Link.STL" />
+        <mesh name="rightinn_Link" file="rightinn_Link.STL" />
+        <mesh name="right_pad" file="right_pad.STL" />
+        <mesh name="camera_link" file="Camera_Link.STL" />
+        <mesh name="lidar_Link" file="lidar_Link.STL" />
+        <texture name="texplane" type="2d" builtin="checker" rgb1=".0 .0 .0" rgb2=".8 .8 .8" width="100" height="100" />
+        <material name="matplane" reflectance="0." texture="texplane" texrepeat="1 1" texuniform="true" />
+        <material name="visualgeom" rgba="0.5 0.9 0.2 1" />
+
+        <material name="groundplane" texture="woodplane" texuniform="true" texrepeat="5 5" reflectance="0.2"/>
+        <material name="glass" reflectance="0.5" texrepeat="5 5" texture="tex-glass" texuniform="true"/>
+        <material name="coke" reflectance="0.7" texrepeat="5 5" texture="tex-can" texuniform="true"/>
+        <material name="red-coke" reflectance="0.7" texrepeat="5 5" texture="tex-red-can" texuniform="true"/>
+        <texture file="../../catch_it/textures/light-wood.png" name="woodplane" type="2d"/>
+        <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="3072"/>
+        <texture type="skybox" file="../../catch_it/textures/glass.png" name="tex-glass"/>
+        <texture type="2d" name="groundplane" builtin="checker" mark="edge" rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3"
+                 markrgb="0.8 0.8 0.8" width="300" height="300"/>
+        <texture file="../../catch_it/textures/soda.png" name="tex-can" type="2d"/>
+        <texture file="../../catch_it/textures/red-wood.png" name="tex-red-can" type="2d"/>
+    </asset>
+    <worldbody>
+        <light pos="0 0 10" dir="0 0 -1" directional="true" diffuse="0.7 0.7 0.7" castshadow="true"/>
+        <geom name="floor" size="0 0 0.05" type="plane" friction="0 0 0" material="groundplane"/>
+        <body name="base_link" pos="0.0 0.0 0.0">
+            <freejoint name="base_link"/>
+            <geom name="base_link" type="mesh" rgba="1 1 1 1" mesh="base_link" />
+<!--            <body name="axis_base_link">-->
+<!--                &lt;!&ndash; X 轴 (红色) &ndash;&gt;-->
+<!--                <geom type="cylinder" fromto="0 0 0 0.2 0 0"-->
+<!--                      size="0.02" rgba="1 0 0 1" contype="0" conaffinity="0"/>-->
+<!--                &lt;!&ndash; Y 轴 (绿色) &ndash;&gt;-->
+<!--                <geom type="cylinder" fromto="0 0 0 0 0.2 0"-->
+<!--                      size="0.02" rgba="0 1 0 1" contype="0" conaffinity="0"/>-->
+<!--                &lt;!&ndash; Z 轴 (蓝色) &ndash;&gt;-->
+<!--                <geom type="cylinder" fromto="0 0 0 0 0 0.2"-->
+<!--                      size="0.02" rgba="0 0 1 1" contype="0" conaffinity="0"/>-->
+<!--            </body>-->
+            <geom pos="0.27431 -0.0023912 0.20965" quat="0.981627 0 0.190808 0" type="mesh" rgba="1 1 1 1" mesh="lidar_Link" />
+            <geom pos="0.092125 -0.00034279 0.5067" quat="-3.67321e-06 0 0 1" type="mesh" rgba="1 1 1 1" mesh="arm_base_link" />
+<!--            <body name="axis_arm_base_link" pos="0.092125 -0.00034279 0.5067" quat="-3.67321e-06 0 0 1">-->
+<!--                &lt;!&ndash; X 轴 (红色) &ndash;&gt;-->
+<!--                <geom type="cylinder" fromto="0 0 0 0.2 0 0"-->
+<!--                      size="0.02" rgba="1 0 0 1" contype="0" conaffinity="0"/>-->
+<!--                &lt;!&ndash; Y 轴 (绿色) &ndash;&gt;-->
+<!--                <geom type="cylinder" fromto="0 0 0 0 0.2 0"-->
+<!--                      size="0.02" rgba="0 1 0 1" contype="0" conaffinity="0"/>-->
+<!--                &lt;!&ndash; Z 轴 (蓝色) &ndash;&gt;-->
+<!--                <geom type="cylinder" fromto="0 0 0 0 0 0.2"-->
+<!--                      size="0.02" rgba="0 0 1 1" contype="0" conaffinity="0"/>-->
+<!--            </body>-->
+            <body name="arm_link1" pos="0.092125 -0.00034279 0.7472" quat="-3.67321e-06 0 0 1">
+                <inertial pos="2.1376e-07 0.021108 -0.025186" quat="0.988852 -0.148904 -2.81213e-05 -0.000244243" mass="0.59356" diaginertia="0.0012661 0.00124679 0.000496262" />
+                <joint name="joint1" pos="0 0 0" axis="0 0 1" limited="true" range="-3.107 3.107" />
+                <geom type="mesh" rgba="1 1 1 1" mesh="arm_link1" />
+<!--                <body name="axis_arm_link1">-->
+<!--                    &lt;!&ndash; X 轴 (红色) &ndash;&gt;-->
+<!--                    <geom type="cylinder" fromto="0 0 0 0.2 0 0"-->
+<!--                          size="0.02" rgba="1 0 0 1" contype="0" conaffinity="0"/>-->
+<!--                    &lt;!&ndash; Y 轴 (绿色) &ndash;&gt;-->
+<!--                    <geom type="cylinder" fromto="0 0 0 0 0.2 0"-->
+<!--                          size="0.02" rgba="0 1 0 1" contype="0" conaffinity="0"/>-->
+<!--                    &lt;!&ndash; Z 轴 (蓝色) &ndash;&gt;-->
+<!--                    <geom type="cylinder" fromto="0 0 0 0 0 0.2"-->
+<!--                          size="0.02" rgba="0 0 1 1" contype="0" conaffinity="0"/>-->
+<!--                </body>-->
+                <body name="arm_link2" pos="0 0 0" quat="0.499998 0.5 -0.5 0.500002">
+                    <inertial pos="0.15226 6.0139e-07 -0.0062025" quat="-4.62913e-07 0.800121 2.76094e-06 0.599838" mass="0.86418" diaginertia="0.00207596 0.0020527 0.00050938" />
+                    <joint name="joint2" pos="0 0 0" axis="0 0 1" limited="true" range="-2.269 2.269" />
+                    <geom type="mesh" rgba="1 1 1 1" mesh="arm_link2" />
+<!--                    <body name="axis_arm_link2">-->
+<!--                        &lt;!&ndash; X 轴 (红色) &ndash;&gt;-->
+<!--                        <geom type="cylinder" fromto="0 0 0 0.2 0 0"-->
+<!--                              size="0.02" rgba="1 0 0 1" contype="0" conaffinity="0"/>-->
+<!--                        &lt;!&ndash; Y 轴 (绿色) &ndash;&gt;-->
+<!--                        <geom type="cylinder" fromto="0 0 0 0 0.2 0"-->
+<!--                              size="0.02" rgba="0 1 0 1" contype="0" conaffinity="0"/>-->
+<!--                        &lt;!&ndash; Z 轴 (蓝色) &ndash;&gt;-->
+<!--                        <geom type="cylinder" fromto="0 0 0 0 0 0.2"-->
+<!--                              size="0.02" rgba="0 0 1 1" contype="0" conaffinity="0"/>-->
+<!--                    </body>-->
+                    <body name="arm_link3" pos="0.256 0 0" quat="0.707105 0 0 0.707108">
+                        <inertial pos="5.0421e-06 -0.059593 0.010569" quat="0.424679 0.564959 -0.565553 0.424993" mass="0.28963" diaginertia="0.000656041 0.00063737 0.000114619" />
+                        <joint name="joint3" pos="0 0 0" axis="0 0 1" limited="true" range="-2.356 2.356" />
+                        <geom type="mesh" rgba="1 1 1 1" mesh="arm_link3" />
+<!--                        <body name="axis_arm_link3">-->
+<!--                            &lt;!&ndash; X 轴 (红色) &ndash;&gt;-->
+<!--                            <geom type="cylinder" fromto="0 0 0 0.2 0 0"-->
+<!--                                  size="0.02" rgba="1 0 0 1" contype="0" conaffinity="0"/>-->
+<!--                            &lt;!&ndash; Y 轴 (绿色) &ndash;&gt;-->
+<!--                            <geom type="cylinder" fromto="0 0 0 0 0.2 0"-->
+<!--                                  size="0.02" rgba="0 1 0 1" contype="0" conaffinity="0"/>-->
+<!--                            &lt;!&ndash; Z 轴 (蓝色) &ndash;&gt;-->
+<!--                            <geom type="cylinder" fromto="0 0 0 0 0 0.2"-->
+<!--                                  size="0.02" rgba="0 0 1 1" contype="0" conaffinity="0"/>-->
+<!--                        </body>-->
+                        <body name="arm_link4" pos="0 -0.21 0" quat="0.707105 0.707108 0 0">
+                            <inertial pos="1.1466e-06 -0.018041 -0.021541" quat="0.990405 0.138198 -6.4362e-06 9.6789e-05" mass="0.23941" diaginertia="0.00028594 0.000275321 0.000107299" />
+                            <joint name="joint4" pos="0 0 0" axis="0 0 1" limited="true" range="-3.107 3.107" />
+                            <geom type="mesh" rgba="1 1 1 1" mesh="arm_link4" />
+<!--                            <body name="axis_arm_link4">-->
+<!--                                &lt;!&ndash; X 轴 (红色) &ndash;&gt;-->
+<!--                                <geom type="cylinder" fromto="0 0 0 0.2 0 0"-->
+<!--                                      size="0.02" rgba="1 0 0 1" contype="0" conaffinity="0"/>-->
+<!--                                &lt;!&ndash; Y 轴 (绿色) &ndash;&gt;-->
+<!--                                <geom type="cylinder" fromto="0 0 0 0 0.2 0"-->
+<!--                                      size="0.02" rgba="0 1 0 1" contype="0" conaffinity="0"/>-->
+<!--                                &lt;!&ndash; Z 轴 (蓝色) &ndash;&gt;-->
+<!--                                <geom type="cylinder" fromto="0 0 0 0 0 0.2"-->
+<!--                                      size="0.02" rgba="0 0 1 1" contype="0" conaffinity="0"/>-->
+<!--                            </body>-->
+                            <body name="arm_link5" pos="0 0 0" quat="0.707105 -0.707108 0 0">
+                                <inertial pos="3.4542e-06 -0.059382 0.0073678" quat="0.419751 0.568643 -0.569215 0.420058" mass="0.21879" diaginertia="0.000358601 0.00035053 8.07893e-05" />
+                                <joint name="joint5" pos="0 0 0" axis="0 0 1" limited="true" range="-2.234 2.234" />
+                                <geom type="mesh" rgba="1 1 1 1" mesh="arm_link5" />
+<!--                                <body name="axis_arm_link5">-->
+<!--                                    &lt;!&ndash; X 轴 (红色) &ndash;&gt;-->
+<!--                                    <geom type="cylinder" fromto="0 0 0 0.2 0 0"-->
+<!--                                          size="0.02" rgba="1 0 0 1" contype="0" conaffinity="0"/>-->
+<!--                                    &lt;!&ndash; Y 轴 (绿色) &ndash;&gt;-->
+<!--                                    <geom type="cylinder" fromto="0 0 0 0 0.2 0"-->
+<!--                                          size="0.02" rgba="0 1 0 1" contype="0" conaffinity="0"/>-->
+<!--                                    &lt;!&ndash; Z 轴 (蓝色) &ndash;&gt;-->
+<!--                                    <geom type="cylinder" fromto="0 0 0 0 0 0.2"-->
+<!--                                          size="0.02" rgba="0 0 1 1" contype="0" conaffinity="0"/>-->
+<!--                                </body>-->
+                                <body name="arm_link6" pos="0 -0.1725 0" quat="0.707105 0.707108 0 0">
+                                    <inertial pos="0.0148509 -3.59046e-05 0.0307078" quat="0.686346 -0.164813 -0.163818 0.689152" mass="0.7167" diaginertia="0.0029767 0.00245476 0.00164056" />
+                                    <joint name="joint6" pos="0 0 0" axis="0 0 1" limited="true" range="-6.283 6.283" />
+<!--                                    <body name="axis_arm_link6">-->
+<!--                                        &lt;!&ndash; X 轴 (红色) &ndash;&gt;-->
+<!--                                        <geom type="cylinder" fromto="0 0 0 0.2 0 0"-->
+<!--                                              size="0.02" rgba="1 0 0 1" contype="0" conaffinity="0"/>-->
+<!--                                        &lt;!&ndash; Y 轴 (绿色) &ndash;&gt;-->
+<!--                                        <geom type="cylinder" fromto="0 0 0 0 0.2 0"-->
+<!--                                              size="0.02" rgba="0 1 0 1" contype="0" conaffinity="0"/>-->
+<!--                                        &lt;!&ndash; Z 轴 (蓝色) &ndash;&gt;-->
+<!--                                        <geom type="cylinder" fromto="0 0 0 0 0 0.2"-->
+<!--                                              size="0.02" rgba="0 0 1 1" contype="0" conaffinity="0"/>-->
+<!--                                    </body>-->
+
+                                    <site name="gripper_site" pos="0 0 0.16" euler="-1.57 1.57 -1.57" size="0.005" rgba="1 0 0 1" type="sphere"/>
+<!--                                    <body name="gripper_axis" pos="0 0 0.16" euler="-1.57 1.57 -1.57">-->
+<!--                                        &lt;!&ndash; X 轴 (红色) &ndash;&gt;-->
+<!--                                        <geom type="cylinder" fromto="0 0 0 0.2 0 0"-->
+<!--                                              size="0.02" rgba="1 0 0 1" contype="0" conaffinity="0"/>-->
+<!--                                        &lt;!&ndash; Y 轴 (绿色) &ndash;&gt;-->
+<!--                                        <geom type="cylinder" fromto="0 0 0 0 0.2 0"-->
+<!--                                              size="0.02" rgba="0 1 0 1" contype="0" conaffinity="0"/>-->
+<!--                                        &lt;!&ndash; Z 轴 (蓝色) &ndash;&gt;-->
+<!--                                        <geom type="cylinder" fromto="0 0 0 0 0 0.2"-->
+<!--                                              size="0.02" rgba="0 0 1 1" contype="0" conaffinity="0"/>-->
+<!--                                    </body>-->
+
+                                    <geom type="mesh" rgba="1 1 1 1" mesh="arm_link6" />
+                                    <geom quat="0.707388 0 0 0.706825" type="mesh" rgba="0.478 0.451 0.455 1" mesh="gripper_base_link" />
+                                    <geom pos="0.106 0 0" quat="0.707388 0 0 -0.706825" type="mesh" rgba="0.478 0.451 0.455 1" mesh="camera_link" />
+                                    <camera name="twist" pos = "0 0.1 0" euler="0 3.14 0" fovy="43"/>
+
+                                    <body name="leftout_Link" pos="-4.53906e-05 -0.057 0.07825" quat="0.499798 0.4998 -0.500202 -0.5002">
+                                        <inertial pos="-0.0068505 0.028833 -8.8224e-08" quat="0.702437 0.702453 0.0810661 0.0810622" mass="0.010089" diaginertia="3.86018e-06 3.12e-06 9.67423e-07" />
+                                        <joint name="finger_joint" pos="0 0 0" axis="0 0 -1" limited="true" range="0 1" />
+                                        <geom type="mesh" rgba="0.66667 0.69804 0.76863 1" mesh="leftout_Link" />
+                                        <body name="leftinn_Link" pos="-0.010946 0.0539 0">
+                                            <inertial pos="-0.0310575 0.022769 2.26169e-06" quat="0.328118 0.626271 -0.328344 0.62635" mass="0.036664" diaginertia="1.93732e-05 1.85708e-05 2.89259e-06" />
+                                            <joint name="leftinn_joint" pos="0 0 0" axis="0 0 -1" limited="true" range="-1 0" />
+                                            <geom type="mesh" rgba="0.79216 0.81961 0.93333 1" mesh="leftinn_Link" />
+                                            <geom pos="-0.04597 0.041903 0" type="mesh" rgba="0.79216 0.81961 0.93333 1" mesh="left_pad" />
+                                        </body>
+                                    </body>
+                                    <body name="left_kckle" pos="-1.91118e-05 -0.024 0.09025" quat="0.499801 0.499801 -0.500199 -0.500199">
+                                        <inertial pos="-0.0057173 0.023663 -3.1623e-06" quat="0.992985 -0.000314045 -7.87591e-05 0.118243" mass="0.012137" diaginertia="1.11137e-05 6.51364e-06 5.0823e-06" />
+                                        <joint name="left_kckle_joint" pos="0 0 0" axis="0 0 -1" limited="true" range="-1 1" />
+                                    </body>
+                                    <body name="rightout_Link" pos="4.53906e-05 0.057 0.07825" quat="0.500198 0.5002 0.499802 0.4998">
+                                        <inertial pos="-0.0068505 0.028833 -8.8224e-08" quat="0.702437 0.702453 0.0810661 0.0810622" mass="0.010089" diaginertia="3.86018e-06 3.12e-06 9.67423e-07" />
+                                        <joint name="rightout_joint" pos="0 0 0" axis="0 0 -1" limited="true" range="0 1" />
+                                        <geom type="mesh" rgba="0.66667 0.69804 0.76863 1" mesh="rightout_Link" />
+                                        <body name="rightinn_Link" pos="-0.010946 0.0539 0">
+                                            <inertial pos="-0.0310575 0.022769 2.26169e-06" quat="0.328118 0.626271 -0.328344 0.62635" mass="0.036664" diaginertia="1.93732e-05 1.85708e-05 2.89259e-06" />
+                                            <joint name="rightinn_joint" pos="0 0 0" axis="0 0 -1" limited="true" range="-1 0" />
+                                            <geom type="mesh" rgba="0.79216 0.81961 0.93333 1" mesh="rightinn_Link" />
+                                            <geom pos="-0.04597 0.041903 0" type="mesh" rgba="0.79216 0.81961 0.93333 1" mesh="right_pad" />
+                                        </body>
+                                    </body>
+                                    <body name="right_kckle" pos="1.91118e-05 0.024 0.09025" quat="0.500199 0.500199 0.499801 0.499801">
+                                        <inertial pos="-0.0057173 0.023663 -3.1623e-06" quat="0.992985 -0.000314045 -7.87591e-05 0.118243" mass="0.012137" diaginertia="1.11137e-05 6.51364e-06 5.0823e-06" />
+                                        <joint name="right_kckle_joint" pos="0 0 0" axis="0 0 -1" limited="true" range="-1 1" />
+                                    </body>
+                                </body>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+            </body>
+        </body>
+        <body name="wall">
+            <geom name="wall_north" type="box" size="5 0.1 1" pos="0 5 1" rgba="1 1 0 1"/>
+            <geom name="wall_south" type="box" size="5 0.1 1" pos="0 -5 1" rgba="1 1 0 1"/>
+            <geom name="wall_east" type="box" size="0.1 5 1" pos="5 0 1" rgba="1 1 0 1"/>
+            <geom name="wall_west" type="box" size="0.1 5 1" pos="-5 0 1" rgba="1 1 0 1"/>
+        </body>
+        <body name="table_cube">
+          <geom name="obstacle_0" type="box" size="0.1 0.1 0.35" pos="0.0 0.0 0.35" rgba="0.6 0.4 0.2 1" />
+        </body>
+        <body name="bottle" pos="0.8 -0.8  0.84">
+            <geom name="bottle" type="cylinder" size="0.025 0.1" rgba="0.2 0.6 1 1"/>
+        </body>
+    </worldbody>
+    <contact>
+        <pair name = "floor_wheel" geom1 = "floor" geom2 = "base_link" friction = "0 0 0" solref="0.02 1" solimp="0.9 0.95 0.001"/>
+<!--        <pair name = "floor_wheel_1" geom1 = "floor" geom2 = "wheel_l" friction = "0 0 0" solref="0.02 1" solimp="0.9 0.95 0.001"/>-->
+<!--        <pair name = "floor_wheel_2" geom1 = "floor" geom2 = "wheel_r" friction = "0 0 0" solref="0.02 1" solimp="0.9 0.95 0.001"/>-->
+<!--        <pair name = "floor_wheel_3" geom1 = "floor" geom2 = "wheel_fclw" friction = "0 0 0" solref="0.02 1" solimp="0.9 0.95 0.001"/>-->
+<!--        <pair name = "floor_wheel_4" geom1 = "floor" geom2 = "wheel_fcrw" friction = "0 0 0" solref="0.02 1" solimp="0.9 0.95 0.001"/>-->
+<!--        <pair name = "floor_wheel_5" geom1 = "floor" geom2 = "wheel_bclw" friction = "0 0 0" solref="0.02 1" solimp="0.9 0.95 0.001"/>-->
+<!--        <pair name = "floor_wheel_6" geom1 = "floor" geom2 = "wheel_bcrw" friction = "0 0 0" solref="0.02 1" solimp="0.9 0.95 0.001"/>-->
+    </contact>
+    <actuator>
+      <motor joint="joint1" ctrlrange="-100 100"/>
+      <motor joint="joint2" ctrlrange="-100 100"/>
+      <motor joint="joint3" ctrlrange="-100 100"/>
+      <motor joint="joint4" ctrlrange="-100 100"/>
+      <motor joint="joint5" ctrlrange="-100 100"/>
+      <motor joint="joint6" ctrlrange="-100 100"/>
+    </actuator>
+</mujoco>

@@ -1,0 +1,49 @@
+#!/home/island/.conda/envs/rlgpu/bin/python3
+import os, sys
+current_path = os.path.dirname(os.path.abspath(__file__))
+parent_path = os.path.dirname(current_path)
+sys.path.append(parent_path)
+import rospy
+import numpy as np
+import pdb
+import cv2
+import rospkg
+from cv_bridge import CvBridge
+from scipy.spatial.transform import Rotation as R
+from moma_bringup.msg import moma_state
+from sensor_msgs.msg import JointState
+from sensor_msgs.msg import Image
+from sensor_msgs.msg import CompressedImage
+from std_msgs.msg import Header,Bool
+from geometry_msgs.msg import Twist
+from nav_msgs.msg import Odometry  
+from geometry_msgs.msg import Pose
+from tf.transformations import quaternion_from_matrix
+# from moma_bringup.scripts.moma_controller import MomaController
+from utils.common import *
+
+cur_position = 14
+gripper_state = 1
+
+class SyncAndPublish:
+    def __init__(self, moma_controller):
+        self.pub_state = rospy.Publisher("/moma_state", moma_state, queue_size=10)
+        self.pub_odometry = rospy.Publisher("/moma_state/odometry", Odometry, queue_size=10)
+        self.pub_rgb = rospy.Publisher("/moma_state/rgb_image", CompressedImage, queue_size=10)
+        self.pub_depth = rospy.Publisher("/moma_state/depth_image", Image, queue_size=10)
+        self.pub_joint_state = rospy.Publisher("/moma_state/joint_state", JointState, queue_size=10)
+        self.pub_gripper_state = rospy.Publisher("/moma_state/gripper_state", Bool, queue_size=10)
+        self.pub_epos_in_lidar = rospy.Publisher("/moma_state/epos_in_lidar", Pose, queue_size=10)
+        self.pub_chassis_twist = rospy.Publisher("/moma_state/chassis_twist", Twist, queue_size=10)
+
+        self.timer = rospy.Timer(rospy.Duration(0.01), self.publish_synced_msg)
+        self.joint_names = []
+        cfg_path = rospkg.RosPack().get_path('moma_bringup')
+        cfg_path = os.path.join(cfg_path, '../../')
+
+        self.moma_controller = moma_controller
+
+        self.bridge = CvBridge()
+        self.syn_cnt = 0
+                self.joint_state_data, self.rgb_data, self.depth_data, self.chassis_vel, self.odometry_data, self.ee_pos\
+            = None, None, None, None, None, None
