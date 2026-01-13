@@ -64,7 +64,7 @@ class GraspPosDetector:
         self.num_view = self.args['num_view']
         self.collision_thresh = self.args['collision_threshold']
         self.voxel_size = self.args['voxel_size']
-
+        self.device = self.args['device']
         self.net = self._get_net()
 
 
@@ -102,8 +102,7 @@ class GraspPosDetector:
         # o3d.visualization.draw_geometries([cloud, axis])
         end_points = dict()
         cloud_sampled = torch.from_numpy(cloud_sampled[np.newaxis].astype(np.float32))
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        cloud_sampled = cloud_sampled.to(device)
+        cloud_sampled = cloud_sampled.to(self.device)
         end_points['point_clouds'] = cloud_sampled
         end_points['cloud_colors'] = color_sampled
         return end_points, cloud

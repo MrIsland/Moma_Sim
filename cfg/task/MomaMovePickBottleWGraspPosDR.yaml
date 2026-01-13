@@ -139,6 +139,7 @@ graspfusioner:
     num_view: 300
     collision_threshold: 0.01
     voxel_size: 0.01
+    device: ${....sim_device}
 
 visual_encoder:
   net: depth_anything
