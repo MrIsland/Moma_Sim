@@ -1,0 +1,22 @@
+#graspfusioner:
+#  interval_size: 0.15
+#  max_octree_threshold: 0.45
+#  min_octree_threshold: 0.3
+#  min_ori_threshold: 1.57
+#  min_component_size: 20
+#  max_grasp_pos: 200
+
+graspfusioner:
+  interval_size: 0.03     # 3cm
+  max_octree_threshold: 0.1   #
+  min_octree_threshold: 0.05
+  min_ori_threshold: 0.785   # pi / 4
+  min_component_size: 3
+  max_grasp_pos: 200
+
+  graspnet:
+    ckpt_path: '../ckpts/graspnet/checkpoint-rs.tar'
+    num_point: 20000
+    num_view: 300
+    collision_threshold: 0.01
+    voxel_size: 0.01

@@ -1,0 +1,28 @@
+MomaMovePickBottleStateWGraspPos
+    Doing: 让机器人从初始位置开始，自己去将瓶子拿起来。在这个过程中在瓶子边缘生成优秀的抓取pose，并加入observation-to-grasp reward
+    Observation(29 + 640):cubeA_pose(7) + eef_pose(7) + q_gripper(6) + cubeA_pos_relative_robot_2d(2) + robot_vel(6)
+                    flag_collision(1) + grasp_pos_vector(640)
+    self.moma_default_state_pos = to_torch(
+        [-0.7, -0.5, 0.0, 0.0, 0.0, 0.707, 0.707], device=self.device
+    )
+    机械臂最后的抓取pose会与设定的优秀的抓取pose合拢,grasp_pos_vector来自于优秀的grasp pos
+
+MomaMovePickBottleVisionWGraspPos
+    python test.py task=MomaMovePickBottleVisionWGraspPos
+    Doing: 在MomaMovePickBottleStateWGraspPos的基础上加入深度图,以及encode deep image
+    Observation(29 + 640 + num_visual_observation):cubeA_pose(7) + eef_pose(7) + q_gripper(6) + cubeA_pos_relative_robot_2d(2) + robot_vel(6)
+                    flag_collision(1) + grasp_pos_vector(640) + curr_depth_img_tensor_batch(num_visual_observation)
+    self.moma_default_state_pos = to_torch(
+        [-0.7, -0.5, 0.0, 0.0, 0.0, 0.707, 0.707], device=self.device
+    )
+    机械臂最后的抓取pose会与设定的优秀的抓取pose合拢,grasp_pos_vector来自于优秀的grasp pos
+
+MomaMovePickBottleWGraspPos  [真正的视觉版本]
+    Doing: 让机器人从初始位置开始，自己去将瓶子拿起来。在这个过程中在瓶子边缘生成优秀的抓取pose，并加入observation-to-grasp reward
+        grasp pos来自于grasp pos fusion模块,深度图传入gs-net得到grasp pos.
+    Observation(29 + 640 + num_visual_observation):cubeA_pose(7) + eef_pose(7) + q_gripper(6) + cubeA_pos_relative_robot_2d(2) + robot_vel(6)
+                    flag_collision(1) + grasp_pos_vector(640) + curr_depth_img_tensor_batch(num_visual_observation)
+    self.moma_default_state_pos = to_torch(
+        [-0.7, -0.5, 0.0, 0.0, 0.0, 0.707, 0.707], device=self.device
+    )
+    机械臂最后的抓取pose会与grasp pos fusion出来的grasp pos合拢,grasp_pos_vector来自于融合后优秀grasp pos.
