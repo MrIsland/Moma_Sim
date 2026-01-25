@@ -1,5 +1,5 @@
 # used to create the object
-name: MomaMovePickBottleStateWFlyGraspPosDR
+name: MomaMovePickBottleStateWFlyGraspPosFusionDR
 
 physics_engine: ${..physics_engine}
 
@@ -82,7 +82,7 @@ env:
       y: [0.5, 1.5]
 
   # set to True if you use camera sensors in the environment
-  enableCameraSensors: False
+  enableCameraSensors: True
 
 sim:
   dt: 0.01667 # 0.01667 # 1/60
@@ -109,7 +109,31 @@ sim:
 
 task:
   randomize: False
+  data_save: True
 
 constant_action:
 #  base_vel: [0, 0.0, 0.0, 0.0, 0.0, 0.0]   # (vx, vy, vz, wx, wy, wz)
   base_vel: [0, 0.2, 0.0, 0.0, 0.0, 0.0]   # (vx, vy, vz, wx, wy, wz)
+
+graspfusioner:
+  interval_size: 0.03     # 3cm
+  max_octree_threshold: 0.06   #
+  min_octree_threshold: 0.03
+  min_ori_threshold: 0.785   # pi / 4
+  min_component_size: 3
+  max_grasp_pos: 200
+
+  graspnet:
+    ckpt_path: './ckpts/graspnet/checkpoint-rs.tar'
+    num_point: 20000  # 20000
+    num_view: 300
+    collision_threshold: 0.01
+    voxel_size: 0.01
+    device: ${....sim_device}
+
+visual_encoder:
+  net: depth_anything
+  in_channels: 3
+  img_h: 448
+  img_w: 448
+  flag_crop: False

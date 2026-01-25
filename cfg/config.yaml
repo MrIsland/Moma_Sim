@@ -5,7 +5,7 @@ task_name: ${task.name}
 experiment: ''
 
 # if set to positive integer, overrides the default number of environments
-num_envs: 32 # 1024, 32, 64
+num_envs: 1024 # 1024, 32, 64
 
 # seed - set to -1 to choose random seed
 seed: 42
@@ -35,8 +35,9 @@ num_subscenes: 4 # Splits the simulation into N physics scenes and runs each one
 # test - if set, run policy in inference mode (requires setting checkpoint to load)
 test: False
 # used to set checkpoint path
-#checkpoint: './runs/dagger/dagger_with_model/MomaMovePickBottleWGraspPosDR_15-16-14-31/nn/model_600.pth'
-checkpoint: './runs/dagger/dagger_with_model/MomaMovePickBottleWGraspPosDR_15-16-14-31/nn/model_600_optim.pth'
+checkpoint: ''
+#checkpoint: './runs/dagger/dagger_with_model/MomaMovePickBottleWGraspPosDR_12-23-00-41/nn/model_600_optim.pth'
+#checkpoint: './runs/dagger/dagger_with_model/MomaMovePickBottleWGraspPosDR_15-16-14-31/nn/model_600_optim.pth'
 #checkpoint: './runs/dagger/MomaMovePickBottleWGraspPosDR_11-21-38-26/nn/model_24099.pt'
 #checkpoint: './runs/MomaMovePickBottleWGraspPosDR_23-17-48-28/nn/MomaMovePickBottleWGraspPosDR.pth'
 #checkpoint: './runs/MomaMovePickBottleWGraspPosDR_22-11-49-11/nn/MomaMovePickBottleWGraspPosDR.pth'

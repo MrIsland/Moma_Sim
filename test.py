@@ -219,7 +219,6 @@ def launch_rlg_hydra(cfg: DictConfig):
         os.makedirs(experiment_dir, exist_ok=True)
         with open(os.path.join(experiment_dir, 'config_dagger.yaml'), 'w') as f:
             f.write(OmegaConf.to_yaml(cfg))
-
     runner.run({
         'train': not cfg.test,
         'play': cfg.test,

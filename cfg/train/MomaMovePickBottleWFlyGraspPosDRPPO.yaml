@@ -31,11 +31,18 @@ params:
       regularizer:
         name: None
 
+    visual_encoder:
+      net: depth_anything
+      in_channels: 3
+      img_h: 448
+      img_w: 448
+      flag_crop: False
+
   load_checkpoint: ${if:${...checkpoint},True,False} # flag which sets whether to load the checkpoint
   load_path: ${...checkpoint} # path to the checkpoint to load
 
   config:
-    name: ${resolve_default:MomaMovePickBottleStateWFlyGraspPosDR,${....experiment}}
+    name: ${resolve_default:MomaMovePickBottleFlyWGraspPosDR,${....experiment}}
     full_experiment_name: ${.name}
     env_name: rlgpu
     multi_gpu: ${....multi_gpu}
@@ -64,7 +71,7 @@ params:
     truncate_grads: True
     e_clip: 0.2
     horizon_length: 32
-    minibatch_size: 16384 # 16384
+    minibatch_size: 32 # 16384
     mini_epochs: 5
     critic_coef: 4
     clip_value: True

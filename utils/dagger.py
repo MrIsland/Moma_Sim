@@ -763,7 +763,8 @@ class DAggerWithModelAgent:
         state = self.get_weights()
         state['epoch'] = 0
         state['frame'] = 0
-        state['optimizer'] = optim.Adam(self.model_student.parameters(), float(5e-4), eps=1e-08, weight_decay=0.0)
+        tmp_optim = optim.Adam(self.model_student.parameters(), float(5e-4), eps=1e-08, weight_decay=0.0)
+        state['optimizer'] = tmp_optim.state_dict()
 
         return state
 

@@ -14,13 +14,13 @@ import math
 from isaacgym.torch_utils import quat_rotate
 from isaacgymenvs.utils.torch_jit_utils import quat_mul, to_torch, tensor_clamp, quat_apply
 from isaacgymenvs.tasks.base.vec_task import VecTask
-from utils.common import random_z_rotation_quaternion, mov, pose_to_matrix, pose_to_matrix_batch,\
-    rotmat_to_euler_xyz_batch, get_quat_180, opengl_trans_opencv, pre_process_rgb_img
+from utils.common import random_z_rotation_quaternion, mov, pose_to_matrix, pose_to_matrix_batch, rotmat_to_euler_xyz_batch,\
+    low_pass_filter, pre_process_rgb_img, opengl_trans_opencv
 from utils.GraspFusionUnion import GraspFusion
 from scipy.spatial.transform import Rotation as R
 import cv2
 
-from utils.common import load_urdf_with_txt, sample_from_regions_np, low_pass_filter
+from utils.common import load_urdf_with_txt, sample_from_regions_np
 
 from learning.depth_anything_v2_encoder import DepthAnythingV2Encoder
 
@@ -113,10 +113,9 @@ def axisangle2quat(vec, eps=1e-6):
     return quat
 
 
-class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
+class MomaMovePickBottleStateWFlyGraspPosFusionDR(VecTask):
     def __init__(self, cfg, rl_device, sim_device, graphics_device_id, headless, virtual_screen_capture, force_render):
         self.cfg = cfg
-
         self.max_episode_length = self.cfg["env"]["episodeLength"]
 
         self.action_scale = self.cfg["env"]["actionScale"]
@@ -170,7 +169,7 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         self.handles = {}  # will be dict mapping names to relevant sim handles
         self.num_dofs = None  # Total number of DOFs per env
         self.actions = None  # Current actions to be deployed
-        self.prev_actions = None  # Prevent actions to be deployed
+        self.prev_actions = None
         self._init_bottleA_state = None  # Initial state of bottleA for the current env
         # self._init_cubeB_state = None           # Initial state of cubeB for the current env
         self._bottleA_state = None  # Current state of bottleA for the current env
@@ -214,13 +213,13 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         self.camera_seg_tensor_list = []
 
         self.obj_asset_list = []
+        self.flag_reset = False
 
         self.debug_viz = self.cfg["env"]["enableDebugVis"]
         self.debug_vis_grasp_pos = self.cfg["env"]["enableDebugVis_grasppos"]
 
         self.up_axis = "z"
         self.up_axis_idx = 2
-        self.temperature = 0.5
 
         self._contact_bodies = ['arm_base_link', 'arm_link1', 'arm_link2', 'arm_link3',
                                 'arm_link4', 'arm_link5', 'arm_link6', 'link_7',
@@ -231,6 +230,8 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         self.segmentation_id = {
             'bottleA': 1
         }
+
+
 
         super().__init__(config=self.cfg, rl_device=rl_device, sim_device=sim_device,
                          graphics_device_id=graphics_device_id, headless=headless,
@@ -243,8 +244,8 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         )
         self.moma_default_state_pos = to_torch(
             [-0.8, 0.8, 0.0, 0.0, 0.0, 0.0, 1.0], device=self.device
-            # [-0.5, -0.5, 0.0, 0.0, 0.0, 0, 1], device=self.device
-            # [-0.2, -0.5, 0.0, 0.0, 0.0, 0.707, 0.707], device=self.device
+            # [-0.8, -0.8, 0.0, 0.0, 0.0, 0.707, 0.707], device=self.device
+            # [-0.8, -0.8, 0.0, 0.0, 0.0, 0.0, 1.0], device=self.device
         )
         self.grasp_pose_factories = []
         for i in range(self.num_envs):
@@ -278,7 +279,6 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         self.gym.step_graphics(self.sim)  # ⭐ 更新图形渲染
         self.gym.draw_viewer(self.viewer, self.sim, True)  # 在 viewer 中显示帧
         self.gym.sync_frame_time(self.sim)  # 同步到固定 frame rate
-
         # Refresh tensors
         self._refresh()
 
@@ -333,6 +333,7 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         asset_options.thickness = 0.001
         asset_options.default_dof_drive_mode = gymapi.DOF_MODE_NONE
         asset_options.use_mesh_materials = True
+        # pdb.set_trace()
         self.moma_asset = self.gym.load_asset(self.sim, asset_root, Moma_asset_file, asset_options)
         # bottle_asset_options = gymapi.AssetOptions()
         # # bottle_asset_options.density = 150
@@ -373,6 +374,7 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
 
         ######################################################################
         self.bottleA_height = None
+        self.bottleA_vel = torch.zeros(self.num_envs, 3, device=self.device)
 
         # Create bottleA asset
         # bottleA_opts = gymapi.AssetOptions()
@@ -425,8 +427,7 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         table_start_pose = gymapi.Transform()
         table_start_pose.p = gymapi.Vec3(*table_pos)
         table_start_pose.r = gymapi.Quat(0.0, 0.0, 0.0, 1.0)
-        table_x, table_y = self.cfg['env']['asset'].get('tableX', 0.0), self.cfg['env']['asset'].get('tableY', 0.0)
-        self._table_surface_pos = np.array([table_x, table_y, table_thickness])
+        self._table_surface_pos = np.array([0.0, 0.0, table_thickness])
         self.reward_settings["table_height"] = self._table_surface_pos[2]
 
         # Define start pose for bottles (doesn't really matter since they're get overridden during reset() anyways)
@@ -438,8 +439,8 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         num_moma_bodies = self.gym.get_asset_rigid_body_count(self.moma_asset)
         num_moma_shapes = self.gym.get_asset_rigid_shape_count(self.moma_asset)
         # todo: 增加墙的时候这部分要修改
-        max_agg_bodies = num_moma_bodies + 2 + 4 + 3  # 1 for table, 4 for walls
-        max_agg_shapes = num_moma_shapes + 2 + 4 + 3 # 1 for table, 4 for walls
+        max_agg_bodies = num_moma_bodies + 1 + 4 + 3  # 1 for table, 4 for walls
+        max_agg_shapes = num_moma_shapes + 1 + 4 + 3 # 1 for table, 4 for walls
         print('max_agg_bodies:    {}'.format(max_agg_bodies))
         print('max_agg_shapes:    {}'.format(max_agg_shapes))
         self.momas = []
@@ -462,14 +463,6 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
             if self.aggregate_mode == 2:
                 self.gym.begin_aggregate(env_ptr, max_agg_bodies, max_agg_shapes, True)
 
-            # Create table
-            length, width = np.random.rand() * 0.2 + 0.1, np.random.rand() * 0.2 + 0.1
-            table_asset = self.gym.create_box(self.sim, *[length, width, table_thickness], table_opts)
-            self._table_id = self.gym.create_actor(env_ptr, table_asset, table_start_pose, "table", i, 1, 0)
-            # self.gym.set_rigid_body_color(env_ptr, table_actor, 0, gymapi.MESH_VISUAL_AND_COLLISION, bottleA_color)
-            # table_stand_actor = self.gym.create_actor(env_ptr, table_stand_asset, table_stand_start_pose, "table_stand",
-            #                                           i, 1, 0)
-
             if self.aggregate_mode == 1:
                 self.gym.begin_aggregate(env_ptr, max_agg_bodies, max_agg_shapes, True)
 
@@ -487,6 +480,7 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
                 wall_id = self.gym.create_actor(env_ptr, wall_asset, pose, f"wall_{j}", i, 3, 0)
                 self._wall_ids[j] = wall_id
 
+            # pdb.set_trace()
             # scene layout obstacle
             self._obstacle_ids = torch.zeros(3).long()
             for j in range(3):
@@ -523,6 +517,8 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         self.base_body_indices = [i * max_agg_bodies for i in range(self.num_envs)]
         self.prev_actions = torch.zeros(self.num_envs, self.num_actions, device=self.device)
         self.filtered_actions = torch.zeros(self.num_envs, 2, device=self.device)   # [Low-pass filter in base velocity]
+
+        # pdb.set_trace()
         # Setup data
         self.init_data()
 
@@ -544,10 +540,7 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         self.obj_height_txt = self.cfg['env']['asset']['assetDatasetObjHeightListTxT']
         self.urdf_list, self.scale_list, self.height_list = None, None, None
         if self.cfg['env']['asset']['assetFlagBottleOnly'] is False:
-            self.urdf_list, self.scale_list, self.height_list = load_urdf_with_txt(self.urdf_dataset_path,
-                                                                                   self.obj_list_txt,
-                                                                                   self.obj_scale_txt,
-                                                                                   self.obj_height_txt)
+            self.urdf_list, self.scale_list, self.height_list = load_urdf_with_txt(self.urdf_dataset_path, self.obj_list_txt, self.obj_scale_txt, self.obj_height_txt)
             for obj_asset_file in self.urdf_list:
                 obj_asset_options = gymapi.AssetOptions()
                 obj_asset_options.density = 150
@@ -580,10 +573,7 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
             "left_pad": self.gym.find_actor_rigid_body_handle(env_ptr, moma_handle, "left_pad"),
             "right_pad": self.gym.find_actor_rigid_body_handle(env_ptr, moma_handle, "right_pad"),
             "gripper_site": self.gym.find_actor_rigid_body_handle(env_ptr, moma_handle, "gripper_site"),
-            'arm_base_link': self.gym.find_actor_rigid_body_handle(env_ptr, moma_handle, 'arm_base_link'),
-
-            # Table
-            "table_handle": self.gym.find_actor_rigid_body_handle(env_ptr, self._table_id, 'box'),
+            # 'link6': self.gym.find_actor_rigid_body_handle(env_ptr, moma_handle, 'link6'),
 
             # Cubes
             "bottleA_body_handle": self.gym.find_actor_rigid_body_handle(env_ptr, self._bottleA_id, "link_001"),
@@ -629,7 +619,6 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         mm = gymtorch.wrap_tensor(_massmatrix)  # Tensor(num_env, num_dof, num_dof)
         self._mm = mm[:, :6, :6]
         self._bottleA_state = self._root_state[:, self._bottleA_id, :]
-        self._table_state = self._root_state[:, self._table_id, :]
         self._obstacle_state = self._root_state[:, self._obstacle_ids[0]:self._obstacle_ids[-1]+1, :]
         self._moma_robot_state = self._root_state[:, self.momas[0], :]
         # Initialize states
@@ -638,8 +627,7 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         })
 
         # Initialize actions
-        self._pos_control = torch.zeros((self.num_envs, self.num_dofs), dtype=torch.float,
-                                        device=self.device)  # num_dofs是活动关节数量
+        self._pos_control = torch.zeros((self.num_envs, self.num_dofs), dtype=torch.float, device=self.device)  # num_dofs是活动关节数量
         self._effort_control = torch.zeros_like(self._pos_control)
         # self._robot_state_control = self._moma_robot_state.clone()
 
@@ -649,9 +637,8 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         self._robot_pos_control = self._moma_robot_state[:, :7]
         self._robot_vel_control = self._moma_robot_state[:, 7:]
 
-        # Initialize indices
-        self._global_indices = torch.arange(self.num_envs * (7 + 3), dtype=torch.int32,
-                                            device=self.device).view(self.num_envs, -1)  # 1 for robot table bottleA
+        # Initialize indices   robot + bottle + wall(4) + obstacle(1) = 6
+        self._global_indices = torch.arange(self.num_envs * (6 + 3), dtype=torch.int32, device=self.device).view(self.num_envs, -1)  # 1 for robot bottleA
 
         # Initialize base vel
         # self._robot_state_vel_control = self._moma_robot_state[:, 7:]
@@ -686,7 +673,6 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         self.states.update({
             # Robot
             "q": self._q[:, :],
-            "q_joint_state": self._q[:, 0:6],
             "q_gripper_arm": self._q[:, 0:12],
             "q_gripper": self._q[:, 6:12],
             "eef_pos": self._eef_state[:, :3],
@@ -696,8 +682,7 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
             # "eef_vel": self.curr_robot_vel,
             "eef_lf_pos": self._eef_lf_state[:, :3],
             "eef_rf_pos": self._eef_rf_state[:, :3],
-            "robot_pos": self._moma_robot_state[:, :3],
-            "robot_6d":matrix_to_rotation_6d(quaternion_to_matrix(torch.roll(self._moma_robot_state[:, 3:7], 1))),
+            "robot_pos": self._moma_robot_state[:, 0:7],
             "robot_vel": self._moma_robot_state[:, 7:],
             # "robot_vel": self.curr_robot_vel,
             # "robot_vel": self._moma_robot_state[:, 7:],
@@ -714,9 +699,11 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
             # vision info
             "grasp_pos_vector": self.grasp_pos_tensor.reshape(self.num_envs, -1),
             "fusion_grasp_pos_vector": self.fusion_grasp_pos_tensor.reshape(self.num_envs, -1),
-            "prev_actions": self.prev_actions,
-            "filtered_actions": self.filtered_actions,
+            'prev_actions': self.prev_actions,
+            'filtered_actions': self.filtered_actions,
+            # "curr_depth_img_tensor_batch": state_camera_depth_tensor_batch.reshape(self.num_envs, -1),
             # 'curr_rgb_img_tensor_batch': curr_rgb_img_tensor_batch.reshape(self.num_envs, -1),
+            # 'ori_grasp_pos_vector': self.ori_grasp_pos_tensor.reshape(self.num_envs, -1),
             've_feature': ve_feature.reshape(self.num_envs, -1),
             "r_o2g": self.r_o2g_pool[torch.arange(self.num_envs), self.progress_buf],
             "d_gripper_grasp_pos": self.d_gripper_grasp_pos[torch.arange(self.num_envs), self.progress_buf],
@@ -831,13 +818,7 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         pos, quat = curr_grasp_pos_tensor[:, :, :3], curr_grasp_pos_tensor[:, :, 3:3+4]
         p_gripper, q_gripper = self._eef_state[:, :3], self._eef_state[:, 3:7]
         pos_dist = (p_gripper.unsqueeze(1) - pos).norm(dim=-1)
-        # quat_dist = self.theta(q_gripper.unsqueeze(1), quat)
-
-        quat_dist_0 = self.theta(q_gripper.unsqueeze(1), quat)
-        q_gripper_180 = get_quat_180(q_gripper)
-        quat_dist_180 = self.theta(q_gripper_180.unsqueeze(1), quat)
-        quat_dist = torch.min(quat_dist_0, quat_dist_180)
-
+        quat_dist = self.theta(q_gripper.unsqueeze(1), quat)
         pos_quat_dist = self.reward_settings["o2g_beta1"] * pos_dist + self.reward_settings["o2g_beta2"] * quat_dist
         min_pos_quat_dist, _ = torch.min(pos_quat_dist, dim=1)
         d_gg = math.exp(-1) * min_pos_quat_dist
@@ -848,23 +829,18 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
 
     def compute_o2g_reward(self, grasp_poses_factory):
         # print('self.frame_idx:   {};  len(self.score_pool):   {};   len(self.d_gg_pool):   {}'.format(self.frame_idx, len(self.score_pool), len(self.d_gg_pool)))
-        # self.compute_d_gg()
-        # t = self.progress_buf.clone()
-        # t_1 = t - 1
-        # valid_mask = t > 0
-        # self.r_o2g_pool = to_torch(self.r_o2g_pool)
-        # self.r_o2g_pool[torch.arange(self.num_envs), t] = 0.0
-        # if valid_mask.any():
-        #     env_ids = to_torch(torch.arange(self.num_envs), dtype=torch.int32)[valid_mask]
-        #     t_valid = t[valid_mask]
-        #     t_1_valid = t_1[valid_mask]
-        #     sigma = 1 / (1 + torch.exp(0.5 - (t_valid / self.max_episode_length)))
-        #     self.score_pool = to_torch(self.score_pool)
-        #     r_go = self.score_pool[env_ids, t_valid] / 10
-        #     r_gg = self.d_gg_pool[env_ids, t_valid]
-        #     r_o2g = (1 - sigma) * r_go + sigma * r_gg
-        #     self.r_o2g_pool[env_ids, t_valid] = r_o2g
-
+        # self.compute_score_sum()
+        # for i in range(self.num_envs):
+        #     if self.progress_buf[i] == 0:
+        #         self.r_o2g_pool[i].append(0)
+        #     else:
+        #         t_1 = self.progress_buf[i] - 1
+        #         t = self.progress_buf[i]
+        #         # sigma = 1 / (1 + math.exp(0.5 - (self.frame_idx / self.max_episode_length)))
+        #         # r_go = self.score_pool[t] - self.score_pool[t_1]
+        #         r_gg = self.d_gg_pool[i][t_1] - self.d_gg_pool[i][t]
+        #         r_o2g = 0.5 * r_gg
+        #         self.r_o2g_pool[i].append(r_o2g)
         self.compute_d_gg(grasp_poses_factory)
         t = self.progress_buf.clone()
         t_1 = t - 1
@@ -879,7 +855,6 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
             r_gg = self.d_gg_pool[env_ids, t_1_valid] - self.d_gg_pool[env_ids, t_valid]
             r_o2g = 0.5 * r_gg
             self.r_o2g_pool[env_ids, t_valid] = r_o2g
-
 
     def compute_good_grasp_pos(self, radius=0.1, num_grasps=20):
         bottle_pos = self._bottleA_state[:, :3]
@@ -905,7 +880,7 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         bottle_quat = self._bottleA_state[:, 3:7]  # (N, 4)
 
         # Convert torch quaternion to z_axis (N, 3)
-        z_axis = self.quat_apply_batch(bottle_quat, np.array([0, 0, -1]))  # (N, 3)
+        z_axis = self.quat_apply_batch(bottle_quat, np.array([0, 0, 1]))  # (N, 3)
 
         # Choose orthogonal vector to z_axis for cross product
         dot_z = np.abs(np.sum(z_axis * np.array([0, 0, 1]), axis=1))  # (N,)
@@ -1022,7 +997,6 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         self.flag_collision = self.collision_detection()
         self.grasp_poses_factory = self.compute_good_grasp_pos_batch()
         self.grasp_pos_tensor = self.convert_grasp_pose_to_features(to_torch(self.grasp_poses_factory))
-
         ### fusion grasping poses
         self.curr_camera_rgb_tensor_batch, self.curr_camera_depth_tensor_batch, self.curr_frame_pcd, \
             self.curr_frame_valid, self.camera_view_camera_matric_inv_batch, self.delta_pos_env \
@@ -1057,11 +1031,11 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         collision_flags = (force_norms > collision_threshold).any(dim=1)
         return collision_flags
 
-    def collision_detecton_with_table(self, collision_threshold = 1):
-        table_id = [self.handles['table_handle']] # 这里确定了编号，在程序上可以优化
-        table_contact = self._contact_force[:, table_id, :2]
-        table_contact_force = (torch.norm(table_contact, dim=2) > collision_threshold).any(dim=1)
-        return table_contact_force
+    # def collision_detecton_with_table(self, collision_threshold = 1):
+    #     table_id = [self.handles['table_handle']] # 这里确定了编号，在程序上可以优化
+    #     table_contact = self._contact_force[:, table_id, :2]
+    #     table_contact_force = (torch.norm(table_contact, dim=2) > collision_threshold).any(dim=1)
+    #     return table_contact_force
 
     def collision_detection_with_bottle(self, collision_threshold=0.1):
         bottle_id = [self._bottleA_id]
@@ -1088,59 +1062,43 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         grasp_pos_list = []  # tensor(pos, F(quat), score) -> 10
         ori_grasp_pos_list = [] # tensor(pos, quat, score) -> 8
         for i in range(self.num_envs):
-            #@ 1. 将当前帧的点云加入到该环境下的grasp pose factories.
-            frame_cloud = self.grasp_pose_factories[i].add_new_frame(self.curr_frame_pcd[i], self.curr_frame_valid[i], i,
-                                                                     cam_trans=self.camera_view_camera_matric_inv_batch[i],
-                                                                     delta_env_pos=self.delta_pos_env[i],
-                                                                     target_label=self.segmentation_id['bottleA'])
-
-            #@ 2. 查看是否有fusion后的grasping pose
-            all_grasp_group_array = []
-            list_scene_node = list(self.grasp_pose_factories[i].scene_node)
-            if len(list_scene_node) == 0:
-                #@ 2.1. 如果没有fusion的grasping pose，就生成一些随机的grasping pose
+            frame_cloud = self.grasp_pose_factories[i].add_new_frame(self.curr_frame_pcd[i], self.curr_frame_valid[i], i, self.segmentation_id['bottleA'])
+            if frame_cloud is None:
                 grasp_pos_vector, ori_grasp_pos_vector = self.generate_random_transform_batch(self._bottleA_state[i, :3])
             else:
-                #@ 2.2. 如果有fusion的grasping pose，首先看看有没有合格的grasping pose.
-                for node in list_scene_node:
-                    tmp_grasp_group_array = node.grasp_group_array
-                    if node.score > 0.3:
-                        all_grasp_group_array.append(tmp_grasp_group_array)
-                if len(all_grasp_group_array) == 0:
+                all_grasp_group_array = []
+                list_scene_node = list(self.grasp_pose_factories[i].scene_node)
+                if len(list_scene_node) == 0:
                     grasp_pos_vector, ori_grasp_pos_vector = self.generate_random_transform_batch(self._bottleA_state[i, :3])
-                    grasp_pos_list.append(grasp_pos_vector)
-                    ori_grasp_pos_list.append(ori_grasp_pos_vector)
-                    continue
-                #@ 2.2.1 如果有的话，生成valid_grasp_pos_num个grasping pose.
-                indices = torch.randint(0, len(all_grasp_group_array), (valid_grasp_pos_num, ))
-                sampled = torch.from_numpy(np.array(all_grasp_group_array))[indices]
-                grasp_pos_vector = torch.cat([sampled[:, 13:16], sampled[:, 4:10], sampled[:, 0].unsqueeze(1)],
-                                             dim=1).to(self.device)
-                rot_matrices = sampled[:, 4:4+9].reshape(-1, 3, 3)
-                quats = R.from_matrix(rot_matrices).as_quat()
-                ori_grasp_pos_vector = torch.cat(
-                    [sampled[:, 13:16], torch.from_numpy(quats).to(sampled.device), sampled[:, 0].unsqueeze(1)],
-                    dim=1).to(self.device)
-
+                else:
+                    for node in list_scene_node:
+                        tmp_grasp_group_array = node.grasp_group_array
+                        all_grasp_group_array.append(tmp_grasp_group_array)
+                    indices = torch.randint(0, len(all_grasp_group_array), (valid_grasp_pos_num, ))
+                    sampled = torch.tensor(all_grasp_group_array)[indices]
+                    grasp_pos_vector = torch.cat([sampled[:, 13:16], sampled[:, 4:10], sampled[:, 0].unsqueeze(1)], dim=1).to(self.device)
+                    rot_matrices = sampled[:, 4:4+9].reshape(-1, 3, 3)
+                    quats = R.from_matrix(rot_matrices).as_quat()
+                    ori_grasp_pos_vector = torch.cat([sampled[:, 13:16], torch.from_numpy(quats).to(sampled.device), sampled[:, 0].unsqueeze(1)], dim=1).to(self.device)
             grasp_pos_list.append(grasp_pos_vector)
             ori_grasp_pos_list.append(ori_grasp_pos_vector)
-            curr_score = sum([sce.score for sce in list_scene_node])
-            self.score_pool[i, self.progress_buf[i]] = curr_score
-            self.score_pool_exp[i, self.progress_buf[i]] = torch.exp(to_torch(curr_score) / self.temperature)
-
         grasp_pos_tensor = torch.stack(grasp_pos_list)
         ori_grasp_pos_tensor = torch.stack(ori_grasp_pos_list)
         return grasp_pos_tensor, ori_grasp_pos_tensor
 
     def compute_reward(self, actions):
         wall_contact_force = self.collision_detecton_with_wall()
-        table_contact_force = self.collision_detecton_with_table()
         bottle_contact_force = self.collision_detection_with_bottle()
         obs_contact_force = self.collision_detection_with_obs()
         self.flag_collision |= wall_contact_force
-        self.flag_collision |= table_contact_force
         # self.flag_collision |= bottle_contact_force
         self.flag_collision |= obs_contact_force
+        # print('-------------------------------------------------------')
+        # print('self.flag_collision:     {}'.format(self.flag_collision))
+        # print('wall_contact_force:      {}'.format(wall_contact_force))
+        # print('obs_contact_force:       {}'.format(obs_contact_force))
+        # print('bottle_contact_force:    {}'.format(bottle_contact_force))
+        # print('-------------------------------------------------------')
 
         self.rew_buf[:], self.reset_buf[:] = compute_moma_reward(
             self.reset_buf, self.progress_buf, self.actions, self.states, self.reward_settings,
@@ -1153,8 +1111,7 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         # print('------------------------------------------------')
 
         # obs =  ["eef_pos", "eef_quat", "robot_vel"]  # 1 + 4 + 3 + 3 + 4 + 6 + 2 + 1
-        obs = ['eef_pos', 'eef_6d', 'robot_vel']
-        # obs =  ["eef_pos", "eef_6d", "q_joint_state", "robot_pos", "robot_6d"]  # 3 + 6 + 6 + 3 + 6
+        obs =  ["eef_pos", "eef_6d", "robot_vel"]  # 1 + 4 + 3 + 3 + 4 + 6 + 2 + 1
         # obs += ["q_gripper"] if self.control_type == "osc" or self.control_type == 'ik' else ["q"]
         # obs += ["q_gripper_arm"]
         obs += ['grasp_pos_vector']
@@ -1162,6 +1119,7 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         # obs += ['curr_rgb_img_tensor_batch']
         self.obs_buf = torch.cat([self.states[ob] for ob in obs], dim=-1)
         maxs = {ob: torch.max(self.states[ob]).item() for ob in obs}
+        # pdb.set_trace()
         # path = '/home/island/Desktop/mobile_manipulation/IsaacGymEnvs/isaacgymenvs/test_vis/pt'
         # torch.save(self.obs_buf, os.path.join(path, '{}.pt'.format(self.progress_buf[0].item())))
         return self.obs_buf
@@ -1201,7 +1159,7 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
     #     # lastly, set these sampled values as the new init state.
     #     this_cube_state_all[env_ids, :] = sampled_cube_state
 
-    # @ brief: bottleA的位置固定
+    # @ brief: bottleA的位置固定    todo - bottle position init
     def _reset_init_bottle_state(self, name, env_ids, check_valid=True):
         """
         Init the position of cube(env)
@@ -1229,8 +1187,7 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         # sampled_cube_state[:, :2] = torch.tensor([-0.2, 0.0]).repeat(num_resets, 1)
 
         this_cube_state_all[env_ids, :] = sampled_cube_state
-        # print('self._table_surface_pos:     {}'.format(self._table_surface_pos))
-        # print('sampled_cube_state:       {}'.format(sampled_cube_state))
+
 
     def _reset_init_table_state(self, env_ids, check_valid=True):
         """
@@ -1256,6 +1213,7 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
             aa_rot[:, 2] = 2.0 * self.start_rotation_noise * (torch.rand(num_resets, device=self.device) - 0.5)
             sampled_table_state[:, 3:7] = quat_mul(axisangle2quat(aa_rot), sampled_table_state[:, 3:7])
         this_table_state_all[env_ids, :] = sampled_table_state
+
 
     def _reset_init_robot_state(self, env_ids):
         # tmp_defalut_state_pos = self.moma_default_state_pos.repeat(len(env_ids), 1)
@@ -1353,20 +1311,18 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
 
     def reset_idx(self, env_ids):
         env_ids_int32 = env_ids.to(dtype=torch.int32)
-        for env_id in env_ids:
-            self.grasp_pose_factories[env_id].reset_gltree()
-
         self.bottleA_height = None
         # if not self._i:
-        self._reset_init_table_state(env_ids=env_ids, check_valid=True)
-        self._reset_init_bottle_state(name='A', env_ids=env_ids, check_valid=True)
+        # self._reset_init_table_state(env_ids=env_ids, check_valid=True)
+        # self._reset_init_bottle_state(name='A', env_ids=env_ids, check_valid=True)
+        # pdb.set_trace()
         self._reset_init_obstacle_state(env_ids=env_ids)
         # self._i = True
 
         # Write these new init states to the sim states
         self._bottleA_state[env_ids] = self._init_bottleA_state[env_ids]
-        self._table_state[env_ids] = self._init_table_state[env_ids]
         self._obstacle_state[env_ids] = self._init_obstacle_state[env_ids]
+        # pdb.set_trace()
         # Reset agent
         reset_noise = torch.rand((len(env_ids), 12), device=self.device)
         pos = tensor_clamp(
@@ -1414,23 +1370,15 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         #                                              gymtorch.unwrap_tensor(self._root_state),
         #                                              gymtorch.unwrap_tensor(multi_env_ids_int32),
         #                                              len(multi_env_ids_int32))
-        #Update table states
-        multi_env_ids_table_int32 = self._global_indices[env_ids, 1].flatten()
-        multi_env_ids_cubes_int32 = self._global_indices[env_ids, -1].flatten()
+        # multi_env_ids_cubes_int32 = self._global_indices[env_ids, -1].flatten()
         multi_env_ids_obstacle_int32 = self._global_indices[env_ids, -4:-1].flatten()
-        combined_root_state = torch.cat((multi_env_ids_int32, multi_env_ids_table_int32, multi_env_ids_obstacle_int32, multi_env_ids_cubes_int32), dim=0)
+        # pdb.set_trace()
+        combined_root_state = torch.cat((multi_env_ids_int32, multi_env_ids_obstacle_int32), dim=0)
         self.gym.set_actor_root_state_tensor_indexed(
             self.sim, gymtorch.unwrap_tensor(self._root_state),
             gymtorch.unwrap_tensor(combined_root_state), len(combined_root_state)
         )
-        # Update cube states
-        # self.gym.set_actor_root_state_tensor_indexed(
-        #     self.sim, gymtorch.unwrap_tensor(self._root_state),
-        #     gymtorch.unwrap_tensor(multi_env_ids_cubes_int32), len(multi_env_ids_cubes_int32))
-        # print('reset_idx:     {}'.format(self._root_state))
 
-        self.score_pool[env_ids] = 0
-        self.score_pool_exp[env_ids] = 0
         self.d_gg_pool[env_ids] = 0
         self.r_o2g_pool[env_ids] = 0
         self.d_gripper_grasp_pos[env_ids] = 0
@@ -1440,8 +1388,8 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         self.flag_collision = False
         self.frame_idx = 0
 
-        for grasp_pos_factory in self.grasp_pose_factories:
-            grasp_pos_factory.reset_gltree()
+        # for grasp_pos_factory in self.grasp_pose_factories:
+        #     grasp_pos_factory.reset_gltree()
 
         # with open('./test_vis/test_action.txt', 'a') as file:
         #     file.write('\n')
@@ -1490,7 +1438,7 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         vx_world = quat_rotate(robot_quat, vx_local)
         vx_position = self.sim_params.dt * vx_world
         target_pos = ori_pos + vx_position
-        target_pos[:, 2] = 0.0
+        target_pos[:, 2] = 0.01
         rotvecs = np.zeros((self._moma_robot_state.shape[0], 3))
         rotvecs[:, 2] = wz.cpu().numpy() * self.sim_params.dt
         noise_rots = R.from_rotvec(rotvecs)
@@ -1633,7 +1581,7 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
             os.makedirs(f'./test_vis/{i}', exist_ok=True)
             if rgb_tensor is not None:
                 color_np = rgb_tensor.cpu().numpy()
-                print('color_np.shape:  {}'.format(color_np.shape))
+                # print('color_np.shape:  {}'.format(color_np.shape))
                 color_np = np.reshape(color_np, (self.camera_asset.height, self.camera_asset.width, 4))[:, :, :3]
                 cv2.imwrite(f"./test_vis/{i}/rgb_{self.frame_idx:03d}.png", cv2.cvtColor(color_np, cv2.COLOR_RGB2BGR))
 
@@ -1645,7 +1593,7 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
             if seg_tensor is not None:
                 seg_np = seg_tensor.cpu().numpy()
                 unique_ids = np.unique(seg_np)
-                print('unique_ids:   {}'.format(unique_ids))
+                # print('unique_ids:   {}'.format(unique_ids))
                 seg_np = np.reshape(seg_np, (self.camera_asset.height, self.camera_asset.width))
                 cv2.imwrite(f"./test_vis/{i}/seg_{self.frame_idx:03d}.png", seg_np.astype(np.uint8) * 80)
 
@@ -1692,14 +1640,10 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         self.gym.end_access_image_tensors(self.sim)
         return camera_rgb_tensor_batch, camera_depth_tensor_batch, frame_pcd, frame_valid, camera_view_camera_matric_inv_batch, delta_pos_env
 
+
     def pre_physics_step(self, actions):
         self.actions = actions.clone().to(self.device)
         arm_ee_pos = self.get_arm_ee_pos()
-
-        ##  add EMA
-        # init_mask = (self.progress_buf != 0)
-        # self.actions[init_mask] = 0.3 * self.prev_actions[init_mask] + 0.7 * self.actions[init_mask]
-
         # with open('./test_vis/test_action.txt', 'a') as file:
         #     for row in self.actions:
         #         line = ' '.join([f'{x:.6f}' for x in row.tolist()])
@@ -1720,6 +1664,7 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         #     for row in arm_ee_pos:
         #         line = ' '.join([f'{x:.6f}' for x in row.tolist()])
         #         file.write(line + '\n')
+
         u_wheel, u_arm, u_gripper = self.actions[:, :2], self.actions[:, 2:-1], self.actions[:, -1]
         u_arm = u_arm * self.cmd_arm_limit / self.action_scale
 
@@ -1734,6 +1679,8 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
             u_arm_pos = u_arm[:, :3].cpu().detach().numpy()
             u_arm_rpy = u_arm[:, 3:].cpu().detach().numpy()
             u_arm_rot_vec = R.from_euler('xyz', u_arm_rpy).as_rotvec()
+            # print('---------------------------------------------------------')
+            # print('11111u_arm:     {}'.format(u_arm))
             delta_pos_world = np.einsum('nij,nj->ni', arm_base_matrices, u_arm_pos)  # (num_envs, 3)
             delta_rot_world = np.einsum('nij,nj->ni', arm_base_matrices, u_arm_rot_vec)  # (num_envs, 3)
             delta_rot_world = R.from_rotvec(delta_rot_world).as_quat()
@@ -1754,11 +1701,48 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         self.gym.set_dof_position_target_tensor(self.sim, gymtorch.unwrap_tensor(self._pos_control))
 
         env_ids = torch.arange(self.num_envs, device=self.device)
+
+        # pos_bounds = to_torch(((-0.5, -0.5, 0.8), (0.5, 0.5, 1.2)))
+        pos_bounds = to_torch(((-0.3, -0.3, 0.8), (0.3, 0.3, 1.2)))
+        # ### 位置上的随机游走
+        # delta = self.dt * np.random.randn(self.num_envs, 3) * 0.3
+        # final_bottle_state = torch.clip(self._bottleA_state[:, :3] + to_torch(delta), pos_bounds[0], pos_bounds[1])
+        # self._bottleA_state[:, :3] = final_bottle_state
+
+        ### 速度驱动模型，引入一个隐式速度v
+        acc = 0.05 * torch.randn(self.num_envs, 3, device=self.device)
+        acc[:, 2] *= 0.2
+        self.bottleA_vel = 0.95 * self.bottleA_vel + acc
+
+        max_speed = 0.2
+        speed = torch.norm(self.bottleA_vel, dim=1, keepdim=True)
+        self.bottleA_vel = self.bottleA_vel * torch.clamp(max_speed / (speed + 1e-6), max=1.0)
+        delta = self.bottleA_vel * self.dt
+        if self.frame_idx % 300 < 50:
+            # delta = torch.zeros_like(delta)
+            delta = delta * 0.01
+        final_bottle_state = torch.clip(self._bottleA_state[:, :3] + to_torch(delta), pos_bounds[0], pos_bounds[1])
+        self._bottleA_state[:, :3] = final_bottle_state
+
         multi_env_ids_int32 = self._global_indices[env_ids, 0].flatten()
+        multi_env_ids_bottle_int32 = self._global_indices[env_ids, -1].flatten()
+        combined_root_state = torch.cat((multi_env_ids_int32, multi_env_ids_bottle_int32), dim=0)
+        # if self.flag_reset:
+        #     pdb.set_trace()
         self.gym.set_actor_root_state_tensor_indexed(self.sim,
                                                      gymtorch.unwrap_tensor(self._root_state),
-                                                     gymtorch.unwrap_tensor(multi_env_ids_int32),
-                                                     len(multi_env_ids_int32))
+                                                     gymtorch.unwrap_tensor(combined_root_state),
+                                                     len(combined_root_state))
+        # self.gym.set_actor_root_state_tensor_indexed(self.sim,
+        #                                              gymtorch.unwrap_tensor(self._root_state),
+        #                                              gymtorch.unwrap_tensor(multi_env_ids_bottle_int32),
+        #                                              len(multi_env_ids_bottle_int32))
+        # print('---------------')
+        # print('pre_physics_step:      {}'.format(self._root_state[:, 5:8, :]))
+        # print('multi_env_ids_bottle_int32:    {}'.format(multi_env_ids_bottle_int32))
+        # print('---------------')
+
+        # Bottle Action
         self.gym.refresh_rigid_body_state_tensor(self.sim)
         self._force_tensor[self.base_body_indices, 2] = -9.81 * 16.83
         self.gym.apply_rigid_body_force_tensors(
@@ -1768,6 +1752,8 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
             gymapi.ENV_SPACE
         )
 
+
+
     def post_physics_step(self):
         if self.flag_data_save:
             self.save_obs_and_actions(self.states, self.actions)
@@ -1776,6 +1762,8 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         self.frame_idx += 1
         if len(env_ids) > 0:
             self.reset_idx(env_ids)
+            self.flag_reset = True
+            # pdb.set_trace()
 
         # print('self._contact_state:   {}'.format(self._contact_state))
         self.compute_observations()
@@ -1785,7 +1773,7 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
         # debug viz
         self.debug_vis_draw_grasp_pos()
 
-    def save_obs_and_actions(self, states, actions, path='/media/island/igrape_20T/island/moma/vision_trained_data/high_dr'):
+    def save_obs_and_actions(self, states, actions, path='/media/island/igrape_20T/island/moma/vision_trained_data/high_dr_fly'):
         # pdb.set_trace()
         save_dict = {
             'save_dict_idx': self.save_dict_idx,
@@ -1802,7 +1790,6 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
             self.gym.clear_lines(self.viewer)
             self.gym.refresh_rigid_body_state_tensor(self.sim)
 
-            # 绘制每个env中机器人的ee pos和生成的grasp pos vector
             for i in range(self.num_envs):
                 list_scene_node = self.grasp_poses_factory[i]
                 for grasp_pos in list_scene_node:
@@ -1824,7 +1811,6 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
             bottleA_rot = self.states["bottleA_quat"]
 
             # Plot visualizations
-            # 绘制每个env中瓶子的中心位置和ee pos的坐标系
             for i in range(self.num_envs):
                 for pos, rot in zip((eef_pos, bottleA_pos), (eef_rot, bottleA_rot)):
                     px = (pos[i] + quat_apply(rot[i], to_torch([1, 0, 0], device=self.device) * 0.2)).cpu().numpy()
@@ -1839,8 +1825,6 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
                     self.gym.add_lines(self.viewer, self.envs[i], 1, [p0[0], p0[1], p0[2], pz[0], pz[1], pz[2]],
                                        [0.1, 0.1, 0.85])
 
-
-            # 绘制每个env原地的坐标系
             for i in range(self.num_envs):
                 # env 原点位置和旋转，这里假设就是世界原点无旋转
                 # 如果你有env位姿，用对应的pos和rot替换
@@ -1867,6 +1851,7 @@ class MomaMovePickBottleStateWGraspPosFusionDR(VecTask):
                     self.viewer, self.envs[i], 1,
                     [p0[0], p0[1], p0[2], pz[0], pz[1], pz[2]],
                     [0.1, 0.1, 0.85])  # 蓝色 Z 轴
+
 
     def debug_viz(self):
         if self.viewer and self.debug_viz:
@@ -1917,7 +1902,7 @@ def compute_moma_reward(
     d_gripper = torch.norm(states["eef_lf_pos"] - states["eef_rf_pos"], dim=-1)
     penalty_gripper_closing = (d_gripper < 1e-2)
 
-    # penalty for action jitter
+    # penalty for empty grasping
     delta_action = (actions - states['prev_actions'])
     penalty_action_jitter = (delta_action ** 2).sum(dim=1)
 
@@ -1926,11 +1911,11 @@ def compute_moma_reward(
 
     # success for grasp pos final
     d_gripper_grasp_pos = states['d_gripper_grasp_pos']
-    flag_success_gripper_grasp = (d_gripper_grasp_pos < 0.05)
+    # print('d_gripper_grasp_pos:      {}'.format(d_gripper_grasp_pos))
+    flag_success_gripper_grasp = (d_gripper_grasp_pos < 0.1)
 
     # Compose rewards
     rewards = reward_settings["r_dist_scale"] * dist_reward \
-              + reward_settings["p_gripper_scale"] * penalty_gripper_closing \
               + reward_settings["p_collision_scale"] * (flag_collision | bottle_contact_force) \
               + reward_settings["p_action_jitter_scale"] * penalty_action_jitter \
               + reward_settings["r_o2g_reward_scale"] * r_o2g \
@@ -1945,7 +1930,7 @@ def compute_moma_reward(
         ))
         print('&&  penalty_gripper_closing:    {};  flag_collision:    {};'.format(
             reward_settings["p_gripper_scale"] * penalty_gripper_closing,
-            reward_settings["p_collision_scale"] * (flag_collision | bottle_contact_force),
+            reward_settings["p_collision_scale"] * flag_collision,
         ))
     # We either provide the stack reward or the align + dist reward
     # rewards = torch.where(

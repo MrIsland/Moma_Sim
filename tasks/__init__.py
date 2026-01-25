@@ -49,8 +49,10 @@ from .moma_move_pick_bottle_vision_w_grasp_pos_domain_randomization import MomaM
 from .moma_move_pick_bottle_vision_w_grasp_pos_domain_randomization_two_cam import MomaMovePickBottleVisionWGraspPosDRTwoCam
 from .moma_move_pick_bottle_w_grasp_pos_domain_randomization import MomaMovePickBottleWGraspPosDR
 from .moma_move_pick_bottle_state_w_fly_grasp_pos_domain_randomization import MomaMovePickBottleStateWFlyGraspPosDR
+from .moma_move_pick_bottle_state_w_fly_grasp_pos_fusion_domain_randomization import MomaMovePickBottleStateWFlyGraspPosFusionDR
 from .moma_move_pick_bottle_w_grasp_pos_domain_randomization_two_cam import MomaMovePickBottleWGraspPosDRTwoCam
 from .moma_move_pick_bottle_state_w_grasp_pos_fusion_domain_randomization import MomaMovePickBottleStateWGraspPosFusionDR
+from .moma_move_pick_bottle_w_fly_grasp_pos_domain_randomization import MomaMovePickBottleWFlyGraspPosDR
 from .humanoid import Humanoid
 from .humanoid_amp import HumanoidAMP
 from .ingenuity import Ingenuity
@@ -131,6 +133,7 @@ isaacgym_task_map = {
     "MomaMovePickBottleStateWGraspPosDR": MomaMovePickBottleStateWGraspPosDR,
     "MomaMovePickBottleStateWFlyGraspPosDR": MomaMovePickBottleStateWFlyGraspPosDR,
     "MomaMovePickBottleStateWGraspPosFusionDR": MomaMovePickBottleStateWGraspPosFusionDR,
+    "MomaMovePickBottleStateWFlyGraspPosFusionDR": MomaMovePickBottleStateWFlyGraspPosFusionDR,
     
     "MomaMovePickBottleVisionWGraspPos": MomaMovePickBottleVisionWGraspPos,
     "MomaMovePickBottleVisionWGraspPosDR": MomaMovePickBottleVisionWGraspPosDR,
@@ -139,4 +142,5 @@ isaacgym_task_map = {
     "MomaMovePickBottleWGraspPos": MomaMovePickBottleWGraspPos,
     "MomaMovePickBottleWGraspPosDR": MomaMovePickBottleWGraspPosDR,
     "MomaMovePickBottleWGraspPosDRTwoCam": MomaMovePickBottleWGraspPosDRTwoCam,
+    "MomaMovePickBottleWFlyGraspPosDR": MomaMovePickBottleWFlyGraspPosDR,
 }

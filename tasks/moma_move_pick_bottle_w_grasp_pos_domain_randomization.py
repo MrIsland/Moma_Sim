@@ -666,8 +666,7 @@ class MomaMovePickBottleWGraspPosDR(VecTask):
         })
 
         # Initialize actions
-        self._pos_control = torch.zeros((self.num_envs, self.num_dofs), dtype=torch.float,
-                                        device=self.device)  # num_dofs是活动关节数量
+        self._pos_control = torch.zeros((self.num_envs, self.num_dofs), dtype=torch.float, device=self.device)  # num_dofs是活动关节数量
         self._effort_control = torch.zeros_like(self._pos_control)
         # self._robot_state_control = self._moma_robot_state.clone()
 
@@ -678,8 +677,7 @@ class MomaMovePickBottleWGraspPosDR(VecTask):
         self._robot_vel_control = self._moma_robot_state[:, 7:]
 
         # Initialize indices
-        self._global_indices = torch.arange(self.num_envs * (7 + 3), dtype=torch.int32,
-                                            device=self.device).view(self.num_envs, -1)  # 1 for robot table bottleA
+        self._global_indices = torch.arange(self.num_envs * (7 + 3), dtype=torch.int32, device=self.device).view(self.num_envs, -1)  # 1 for robot table bottleA
 
         # Initialize base vel
         # self._robot_state_vel_control = self._moma_robot_state[:, 7:]
@@ -1136,7 +1134,7 @@ class MomaMovePickBottleWGraspPosDR(VecTask):
         obs = ["eef_pos", "eef_6d", "robot_vel"]
                # "flag_collision"]  # 4 + 3 + 3 + 4 + 6 + 2 + 1
         # obs += ["q_gripper"] if self.control_type != "joint_tor" else ["q"]
-        obs += ['perfect_grasp_pos_vector']
+        obs += ['grasp_pos_vector']
         # obs += ['curr_depth_img_tensor_batch']
         obs += ['ve_feature']
         self.obs_buf = torch.cat([self.states[ob] for ob in obs], dim=-1)
@@ -1368,7 +1366,6 @@ class MomaMovePickBottleWGraspPosDR(VecTask):
             self.sim, gymtorch.unwrap_tensor(self._root_state),
             gymtorch.unwrap_tensor(combined_root_state), len(combined_root_state)
         )
-        # print('reset_idx:     {}'.format(self._root_state))
 
         # self.score_pool, self.r_gg_pool, self.d_gg_pool = [], [], []
         self.score_pool[env_ids] = 0
@@ -1617,7 +1614,7 @@ class MomaMovePickBottleWGraspPosDR(VecTask):
         # pdb.set_trace()
         # frame_pcd[:, :, :3] = frame_pcd[:, :, :3] - delta_pos_env[:, None, :]
 
-        self.save_camera_image(frame_idx)
+        # self.save_camera_image(frame_idx)
         self.gym.end_access_image_tensors(self.sim)
         return camera_rgb_tensor_batch, camera_depth_tensor_batch, frame_pcd, frame_valid, camera_view_camera_matric_inv_batch, delta_pos_env
 
@@ -1696,7 +1693,7 @@ class MomaMovePickBottleWGraspPosDR(VecTask):
     def write_stats(self, reward_dict):
         global_idx = self.global_idx
         for name in self.reward_dict:
-            accumulate_reward(name, self.reward_dict[name], self.progress_buf, self.reward_dict_episode)
+            accumulate_reward(name, reward_dict[name], self.progress_buf, self.reward_dict_episode)
         # print('self.frame_idx:    {}'.format(self.frame_idx))
         if global_idx % self.max_episode_length == 0:
             # print('self.global_idx:     {}'.format(self.global_idx))

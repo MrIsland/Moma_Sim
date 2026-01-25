@@ -35,7 +35,7 @@ params:
   load_path: ${...checkpoint} # path to the checkpoint to load
 
   config:
-    name: ${resolve_default:MomaMovePickBottleStateWFlyGraspPosDR,${....experiment}}
+    name: ${resolve_default:MomaMovePickBottleStateWFlyGraspPosFusionDR,${....experiment}}
     full_experiment_name: ${.name}
     env_name: rlgpu
     multi_gpu: ${....multi_gpu}
@@ -55,7 +55,7 @@ params:
     schedule_type: standard
     kl_threshold: 0.008
     score_to_win: 10000
-    max_epochs: ${resolve_default:50000,${....max_iterations}}
+    max_epochs: ${resolve_default:100000,${....max_iterations}}
     save_best_after: 200
     save_frequency: 100
     print_stats: True

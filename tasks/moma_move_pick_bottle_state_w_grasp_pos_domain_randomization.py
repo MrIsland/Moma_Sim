@@ -161,7 +161,7 @@ class MomaMovePickBottleStateWGraspPosDR(VecTask):
         # actions include: base_pose(2) + delta EEF if OSC (6) or joint torques (7) + bool gripper (1) + flag_heuristic
         self.cfg["env"]["numActions"] = 9
         self.lpf_alpha = self.cfg['env']['LPF']['alpha']
-
+        self.flag_reset = False
         # Values to be filled in at runtime
         self.states = {}  # will be dict filled with relevant states to use for reward calculation
         self.handles = {}  # will be dict mapping names to relevant sim handles
@@ -997,6 +997,8 @@ class MomaMovePickBottleStateWGraspPosDR(VecTask):
         return grasp_poses
 
     def _refresh(self):
+        if self.flag_reset:
+            pdb.set_trace()
         self.gym.refresh_actor_root_state_tensor(self.sim)
         self.gym.refresh_dof_state_tensor(self.sim)
         self.gym.refresh_rigid_body_state_tensor(self.sim)
@@ -1625,6 +1627,8 @@ class MomaMovePickBottleStateWGraspPosDR(VecTask):
         self.gym.set_dof_position_target_tensor(self.sim, gymtorch.unwrap_tensor(self._pos_control))
 
         env_ids = torch.arange(self.num_envs, device=self.device)
+        if self.flag_reset:
+            pdb.set_trace()
         multi_env_ids_int32 = self._global_indices[env_ids, 0].flatten()
         self.gym.set_actor_root_state_tensor_indexed(self.sim,
                                                      gymtorch.unwrap_tensor(self._root_state),
@@ -1632,6 +1636,7 @@ class MomaMovePickBottleStateWGraspPosDR(VecTask):
                                                      len(multi_env_ids_int32))
         self.gym.refresh_rigid_body_state_tensor(self.sim)
         self._force_tensor[self.base_body_indices, 2] = -9.81 * 16.83
+        # print('self.obstacle:     {}'.format(self._root_state[:, self._obstacle_ids[0]:self._obstacle_ids[-1]+1, :]))
         self.gym.apply_rigid_body_force_tensors(
             self.sim,
             gymtorch.unwrap_tensor(self._force_tensor),
@@ -1647,6 +1652,8 @@ class MomaMovePickBottleStateWGraspPosDR(VecTask):
         self.frame_idx += 1
         if len(env_ids) > 0:
             self.reset_idx(env_ids)
+            self.flag_reset = True
+            pdb.set_trace()
 
         # print('self._contact_state:   {}'.format(self._contact_state))
         self.compute_observations()

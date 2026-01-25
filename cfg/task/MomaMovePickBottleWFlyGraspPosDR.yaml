@@ -1,5 +1,5 @@
 # used to create the object
-name: MomaMovePickBottleStateWFlyGraspPosDR
+name: MomaMovePickBottleWFlyGraspPosDR
 
 physics_engine: ${..physics_engine}
 
@@ -16,22 +16,25 @@ env:
 
   startPositionNoise: 0.1
   startRotationNoise: 0.785
-  momaPositionNoise: 0.3
-  momaRotationNoise: 0.5  # 10
-  momaDofNoise: 0.25
-  tableHeightNoise: 0.3 # [-tableHeightNoise, tableHeightNoise]
-  tablePositionNoise: 0.3
+#  momaPositionNoise: 0.3
+#  momaRotationNoise: 0.5  # 10
+#  momaDofNoise: 0.25
+#  tableHeightNoise: 0.3 # [-tableHeightNoise, tableHeightNoise]
+#  tablePositionNoise: 0.3
+#  tableRotationNoise: 0.2
+
+  momaPositionNoise: 0.5
+  momaRotationNoise: 0.2
+  momaDofNoise: 0.1
+  tableHeightNoise: 0.2 # [-tableHeightNoise, tableHeightNoise]
+  tablePositionNoise: 0.2
   tableRotationNoise: 0.2
 
-#  momaPositionNoise: 0.0
-#  momaRotationNoise: 0.0
-#  momaDofNoise: 0.0
-#  tableHeightNoise: 0.0 # [-tableHeightNoise, tableHeightNoise]
-#  tablePositionNoise: 0.0
-#  tableRotationNoise: 0.0
 
+  LPF:
+    alpha: 0.9
 
-  aggregateMode: 10
+  aggregateMode: 9
 
   actionScale: 25    # osc for 0.8
   distRewardScale: 0.1
@@ -52,9 +55,6 @@ env:
 
   controlType: ik  # options are {joint_tor, osc, ik}
 
-  LPF:
-    alpha: 0.9
-
   asset:
     assetFlagBottleOnly: True
     assetRoot: "../../assets"
@@ -67,9 +67,7 @@ env:
     assetDatasetObjScaleListTxT: './utils/ycb_scales.txt'
     assetDatasetObjHeightListTxT: './utils/ycb_height.txt'
 
-    tableHeight: 0.7   # [0.35, 0.7]
-    tableX: 0.1
-    tableY: 0.1
+    tableHeight: 0.8   # [0.35, 0.7]
 
   obstacle_regions:
     - x: [-1.5, -0.5]
@@ -113,3 +111,37 @@ task:
 constant_action:
 #  base_vel: [0, 0.0, 0.0, 0.0, 0.0, 0.0]   # (vx, vy, vz, wx, wy, wz)
   base_vel: [0, 0.2, 0.0, 0.0, 0.0, 0.0]   # (vx, vy, vz, wx, wy, wz)
+
+graspfusioner:
+#  interval_size: 0.15
+#  max_octree_threshold: 0.015
+#  min_octree_threshold: 0.01
+#  min_ori_threshold: 1.57
+
+#  interval_size: 0.15
+#  max_octree_threshold: 0.45
+#  min_octree_threshold: 0.3
+#  min_ori_threshold: 1.57
+#  min_component_size: 20
+#  max_grasp_pos: 200
+  interval_size: 0.03     # 3cm
+  max_octree_threshold: 0.06   #
+  min_octree_threshold: 0.03
+  min_ori_threshold: 0.785   # pi / 4
+  min_component_size: 3
+  max_grasp_pos: 200
+
+  graspnet:
+    ckpt_path: './ckpts/graspnet/checkpoint-rs.tar'
+    num_point: 20000  # 20000
+    num_view: 300
+    collision_threshold: 0.01
+    voxel_size: 0.01
+    device: ${....sim_device}
+
+visual_encoder:
+  net: depth_anything
+  in_channels: 3
+  img_h: 448
+  img_w: 448
+  flag_crop: False
